@@ -31,7 +31,7 @@ class DataLayer : public BasePrefetchingDataLayer<Dtype> {
  protected:
   virtual void load_batch(Batch<Dtype>* batch);
 
-  DataReader<Datum> reader_;
+  DataReader reader_;
 };
 
 }  // namespace caffe

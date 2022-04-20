@@ -32,7 +32,7 @@ def param_name_dict():
     # get all parameter names (typically underscore case) and corresponding
     # type names (typically camel case), which contain the layer names
     # (note that not all parameters correspond to layers, but we'll ignore that)
-    param_names = [f.name for f in layer.DESCRIPTOR.fields if f.name.endswith('_param')]
+    param_names = [s for s in dir(layer) if s.endswith('_param')]
     param_type_names = [type(getattr(layer, s)).__name__ for s in param_names]
     # strip the final '_param' or 'Parameter'
     param_names = [s[:-len('_param')] for s in param_names]
@@ -93,9 +93,6 @@ class Top(object):
 
         return to_proto(self)
 
-    def _update(self, params):
-        self.fn._update(params)
-
     def _to_proto(self, layers, names, autonames):
         return self.fn._to_proto(layers, names, autonames)
 
@@ -130,9 +127,6 @@ class Function(object):
             autonames[top.fn.type_name] += 1
             names[top] = top.fn.type_name + str(autonames[top.fn.type_name])
         return names[top]
-
-    def _update(self, params):
-        self.params.update(params)
 
     def _to_proto(self, layers, names, autonames):
         if self in layers:
@@ -180,26 +174,6 @@ class NetSpec(object):
 
     def __getattr__(self, name):
         return self.tops[name]
-
-    def __setitem__(self, key, value):
-        self.__setattr__(key, value)
-
-    def __getitem__(self, item):
-        return self.__getattr__(item)
-
-    def __delitem__(self, name):
-        del self.tops[name]
-
-    def keys(self):
-        keys = [k for k, v in six.iteritems(self.tops)]
-        return keys
-
-    def vals(self):
-        vals = [v for k, v in six.iteritems(self.tops)]
-        return vals
-
-    def update(self, name, params):
-        self.tops[name]._update(params)
 
     def to_proto(self):
         names = {v: k for k, v in six.iteritems(self.tops)}

@@ -1,12 +1,9 @@
 #include <cstdio>
 
-#include <map>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "caffe/solver.hpp"
-#include "caffe/util/bbox_util.hpp"
 #include "caffe/util/format.hpp"
 #include "caffe/util/hdf5.hpp"
 #include "caffe/util/io.hpp"
@@ -41,19 +38,7 @@ Solver<Dtype>::Solver(const string& param_file, const Solver* root_solver)
       requested_early_exit_(false) {
   SolverParameter param;
   ReadSolverParamsFromTextFileOrDie(param_file, &param);
-  CheckType(&param);
   Init(param);
-}
-
-template <typename Dtype>
-void Solver<Dtype>::CheckType(SolverParameter* param) {
-  // Harmonize solver class type with configured type to avoid confusion.
-  if (param->has_type()) {
-    CHECK_EQ(param->type(), this->type())
-        << "Solver type must agree with instantiated solver class.";
-  } else {
-    param->set_type(this->type());
-  }
 }
 
 template <typename Dtype>
@@ -207,6 +192,7 @@ void Solver<Dtype>::InitTestNets() {
 
 template <typename Dtype>
 void Solver<Dtype>::Step(int iters) {
+  vector<Blob<Dtype>*> bottom_vec;
   const int start_iter = iter_;
   const int stop_iter = iter_ + iters;
   int average_loss = this->param_.average_loss();
@@ -234,7 +220,7 @@ void Solver<Dtype>::Step(int iters) {
     // accumulate the loss and gradient
     Dtype loss = 0;
     for (int i = 0; i < param_.iter_size(); ++i) {
-      loss += net_->ForwardBackward();
+      loss += net_->ForwardBackward(bottom_vec);
     }
     loss /= param_.iter_size();
     // average the loss across iterations for smoothed reporting
@@ -325,7 +311,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   if (param_.display() && iter_ % param_.display() == 0) {
     int average_loss = this->param_.average_loss();
     Dtype loss;
-    net_->Forward(&loss);
+    net_->ForwardPrefilled(&loss);
 
     UpdateSmoothedLoss(loss, start_iter, average_loss);
 
@@ -342,18 +328,12 @@ void Solver<Dtype>::TestAll() {
   for (int test_net_id = 0;
        test_net_id < test_nets_.size() && !requested_early_exit_;
        ++test_net_id) {
-    if (param_.eval_type() == "classification") {
-      TestClassification(test_net_id);
-    } else if (param_.eval_type() == "detection") {
-      TestDetection(test_net_id);
-    } else {
-      LOG(FATAL) << "Unknown evaluation type: " << param_.eval_type();
-    }
+    Test(test_net_id);
   }
 }
 
 template <typename Dtype>
-void Solver<Dtype>::TestClassification(const int test_net_id) {
+void Solver<Dtype>::Test(const int test_net_id) {
   CHECK(Caffe::root_solver());
   LOG(INFO) << "Iteration " << iter_
             << ", Testing net (#" << test_net_id << ")";
@@ -361,6 +341,7 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
       ShareTrainedLayersWith(net_.get());
   vector<Dtype> test_score;
   vector<int> test_score_output_id;
+  vector<Blob<Dtype>*> bottom_vec;
   const shared_ptr<Net<Dtype> >& test_net = test_nets_[test_net_id];
   Dtype loss = 0;
   for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
@@ -381,7 +362,7 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
 
     Dtype iter_loss;
     const vector<Blob<Dtype>*>& result =
-        test_net->Forward(&iter_loss);
+        test_net->Forward(bottom_vec, &iter_loss);
     if (param_.test_compute_loss()) {
       loss += iter_loss;
     }
@@ -424,127 +405,6 @@ void Solver<Dtype>::TestClassification(const int test_net_id) {
     }
     LOG(INFO) << "    Test net output #" << i << ": " << output_name << " = "
               << mean_score << loss_msg_stream.str();
-  }
-}
-
-template <typename Dtype>
-void Solver<Dtype>::TestDetection(const int test_net_id) {
-  CHECK(Caffe::root_solver());
-  LOG(INFO) << "Iteration " << iter_
-            << ", Testing net (#" << test_net_id << ")";
-  CHECK_NOTNULL(test_nets_[test_net_id].get())->
-      ShareTrainedLayersWith(net_.get());
-  map<int, map<int, vector<pair<float, int> > > > all_true_pos;
-  map<int, map<int, vector<pair<float, int> > > > all_false_pos;
-  map<int, map<int, int> > all_num_pos;
-  const shared_ptr<Net<Dtype> >& test_net = test_nets_[test_net_id];
-  Dtype loss = 0;
-  for (int i = 0; i < param_.test_iter(test_net_id); ++i) {
-    SolverAction::Enum request = GetRequestedAction();
-    // Check to see if stoppage of testing/training has been requested.
-    while (request != SolverAction::NONE) {
-        if (SolverAction::SNAPSHOT == request) {
-          Snapshot();
-        } else if (SolverAction::STOP == request) {
-          requested_early_exit_ = true;
-        }
-        request = GetRequestedAction();
-    }
-    if (requested_early_exit_) {
-      // break out of test loop.
-      break;
-    }
-
-    Dtype iter_loss;
-    const vector<Blob<Dtype>*>& result = test_net->Forward(&iter_loss);
-    if (param_.test_compute_loss()) {
-      loss += iter_loss;
-    }
-    for (int j = 0; j < result.size(); ++j) {
-      CHECK_EQ(result[j]->width(), 5);
-      const Dtype* result_vec = result[j]->cpu_data();
-      int num_det = result[j]->height();
-      for (int k = 0; k < num_det; ++k) {
-        int item_id = static_cast<int>(result_vec[k * 5]);
-        int label = static_cast<int>(result_vec[k * 5 + 1]);
-        if (item_id == -1) {
-          // Special row of storing number of positives for a label.
-          if (all_num_pos[j].find(label) == all_num_pos[j].end()) {
-            all_num_pos[j][label] = static_cast<int>(result_vec[k * 5 + 2]);
-          } else {
-            all_num_pos[j][label] += static_cast<int>(result_vec[k * 5 + 2]);
-          }
-        } else {
-          // Normal row storing detection status.
-          float score = result_vec[k * 5 + 2];
-          int tp = static_cast<int>(result_vec[k * 5 + 3]);
-          int fp = static_cast<int>(result_vec[k * 5 + 4]);
-          if (tp == 0 && fp == 0) {
-            // Ignore such case. It happens when a detection bbox is matched to
-            // a difficult gt bbox and we don't evaluate on difficult gt bbox.
-            continue;
-          }
-          all_true_pos[j][label].push_back(std::make_pair(score, tp));
-          all_false_pos[j][label].push_back(std::make_pair(score, fp));
-        }
-      }
-    }
-  }
-  if (requested_early_exit_) {
-    LOG(INFO)     << "Test interrupted.";
-    return;
-  }
-  if (param_.test_compute_loss()) {
-    loss /= param_.test_iter(test_net_id);
-    LOG(INFO) << "Test loss: " << loss;
-  }
-  for (int i = 0; i < all_true_pos.size(); ++i) {
-    if (all_true_pos.find(i) == all_true_pos.end()) {
-      LOG(FATAL) << "Missing output_blob true_pos: " << i;
-    }
-    const map<int, vector<pair<float, int> > >& true_pos =
-        all_true_pos.find(i)->second;
-    if (all_false_pos.find(i) == all_false_pos.end()) {
-      LOG(FATAL) << "Missing output_blob false_pos: " << i;
-    }
-    const map<int, vector<pair<float, int> > >& false_pos =
-        all_false_pos.find(i)->second;
-    if (all_num_pos.find(i) == all_num_pos.end()) {
-      LOG(FATAL) << "Missing output_blob num_pos: " << i;
-    }
-    const map<int, int>& num_pos = all_num_pos.find(i)->second;
-    map<int, float> APs;
-    float mAP = 0.;
-    // Sort true_pos and false_pos with descend scores.
-    for (map<int, int>::const_iterator it = num_pos.begin();
-         it != num_pos.end(); ++it) {
-      int label = it->first;
-      int label_num_pos = it->second;
-      if (true_pos.find(label) == true_pos.end()) {
-        LOG(WARNING) << "Missing true_pos for label: " << label;
-        continue;
-      }
-      const vector<pair<float, int> >& label_true_pos =
-          true_pos.find(label)->second;
-      if (false_pos.find(label) == false_pos.end()) {
-        LOG(WARNING) << "Missing false_pos for label: " << label;
-        continue;
-      }
-      const vector<pair<float, int> >& label_false_pos =
-          false_pos.find(label)->second;
-      vector<float> prec, rec;
-      ComputeAP(label_true_pos, label_num_pos, label_false_pos,
-                param_.ap_version(), &prec, &rec, &(APs[label]));
-      mAP += APs[label];
-      if (param_.show_per_class_result()) {
-        LOG(INFO) << "class" << label << ": " << APs[label];
-      }
-    }
-    mAP /= num_pos.size();
-    const int output_blob_index = test_net->output_blob_indices()[i];
-    const string& output_name = test_net->blob_names()[output_blob_index];
-    LOG(INFO) << "    Test net output #" << i << ": " << output_name << " = "
-              << mAP;
   }
 }
 

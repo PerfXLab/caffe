@@ -37,7 +37,6 @@ class CuDNNReLULayer : public ReLULayer<Dtype> {
   cudnnHandle_t             handle_;
   cudnnTensorDescriptor_t bottom_desc_;
   cudnnTensorDescriptor_t top_desc_;
-  cudnnActivationDescriptor_t activ_desc_;
 };
 #endif
 
