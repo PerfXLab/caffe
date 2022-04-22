@@ -16,7 +16,6 @@ void DropoutLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   DCHECK(threshold_ < 1.);
   scale_ = 1. / (1. - threshold_);
   uint_thres_ = static_cast<unsigned int>(UINT_MAX * threshold_);
-  scale_train_ = this->layer_param_.dropout_param().scale_train();
 }
 
 template <typename Dtype>
@@ -24,8 +23,8 @@ void DropoutLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   NeuronLayer<Dtype>::Reshape(bottom, top);
   // Set up the cache for random number generation
-  rand_vec_.Reshape(bottom[0]->num(), bottom[0]->channels(),
-      bottom[0]->height(), bottom[0]->width());
+  // ReshapeLike does not work because rand_vec_ is of Dtype uint
+  rand_vec_.Reshape(bottom[0]->shape());
 }
 
 template <typename Dtype>
@@ -38,20 +37,11 @@ void DropoutLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   if (this->phase_ == TRAIN) {
     // Create random numbers
     caffe_rng_bernoulli(count, 1. - threshold_, mask);
-    if (scale_train_) {
-      for (int i = 0; i < count; ++i) {
-        top_data[i] = bottom_data[i] * mask[i] * scale_;
-      }
-    } else {
-      for (int i = 0; i < count; ++i) {
-        top_data[i] = bottom_data[i] * mask[i];
-      }
+    for (int i = 0; i < count; ++i) {
+      top_data[i] = bottom_data[i] * mask[i] * scale_;
     }
   } else {
     caffe_copy(bottom[0]->count(), bottom_data, top_data);
-    if (!scale_train_) {
-      caffe_scal<Dtype>(  count, 1. / scale_, top_data);
-    }
   }
 }
 
@@ -65,20 +55,11 @@ void DropoutLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     if (this->phase_ == TRAIN) {
       const unsigned int* mask = rand_vec_.cpu_data();
       const int count = bottom[0]->count();
-      if (scale_train_) {
-        for (int i = 0; i < count; ++i) {
-          bottom_diff[i] = top_diff[i] * mask[i] * scale_;
-        }
-      } else {
-        for (int i = 0; i < count; ++i) {
-          bottom_diff[i] = top_diff[i] * mask[i];
-        }
+      for (int i = 0; i < count; ++i) {
+        bottom_diff[i] = top_diff[i] * mask[i] * scale_;
       }
     } else {
       caffe_copy(top[0]->count(), top_diff, bottom_diff);
-      if (!scale_train_) {
-        caffe_scal<Dtype>(top[0]->count(), 1. / scale_, bottom_diff);
-      }
     }
   }
 }
