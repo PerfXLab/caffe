@@ -31,7 +31,10 @@ def _get_image_blob(im):
             in the image pyramid
     """
     im_orig = im.astype(np.float32, copy=True)
-    im_orig -= cfg.PIXEL_MEANS
+    # modify for mmdetection faster rcnn by houxin 20220824 
+    # im_orig -= cfg.PIXEL_MEANS
+    im_orig -= np.array([[[0.0, 0.0, 0.0]]])
+    # -----------------------------------------
 
     im_shape = im_orig.shape
     im_size_min = np.min(im_shape[0:2])

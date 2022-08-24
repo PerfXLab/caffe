@@ -34,18 +34,45 @@ import numpy as np
 #       [ -79., -167.,   96.,  184.],
 #       [-167., -343.,  184.,  360.]])
 
-def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
-                     scales=2**np.arange(3, 6)):
+# modify for mmdetection faster rcnn by houxin 20220824
+# def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
+#                      scales=2**np.arange(3, 6)):
+def generate_anchors(base_size=4, ratios=[0.4000, 1.0000, 2.5000],
+                     scales=np.array(8.0)):
     """
     Generate anchor (reference) windows by enumerating aspect ratios X
     scales wrt a reference (0, 0, 15, 15) window.
     """
+    # modify for mmdetection faster rcnn by houxin 20220824
+    
+    # base_anchor = np.array([1, 1, base_size, base_size]) - 1
+    # ratio_anchors = _ratio_enum(base_anchor, ratios)
+    # anchors = np.vstack([_scale_enum(ratio_anchors[i, :], scales)
+    #                      for i in range(ratio_anchors.shape[0])])
+    # return anchors
+    
+    w = base_size
+    h = base_size
+    center_offset = 0.0
+    x_center = center_offset * w
+    y_center = center_offset * h
 
-    base_anchor = np.array([1, 1, base_size, base_size]) - 1
-    ratio_anchors = _ratio_enum(base_anchor, ratios)
-    anchors = np.vstack([_scale_enum(ratio_anchors[i, :], scales)
-                         for i in range(ratio_anchors.shape[0])])
-    return anchors
+    h_ratios = np.sqrt(ratios)
+    w_ratios = 1 / h_ratios
+    ws = (w * w_ratios[:, None] * scales).reshape(-1)
+    hs = (h * h_ratios[:, None] * scales).reshape(-1)
+
+    # use float anchor and the anchor's center is aligned with the
+    # pixel center
+    base_anchors = [
+        x_center - 0.5 * ws, y_center - 0.5 * hs, x_center + 0.5 * ws,
+        y_center + 0.5 * hs
+    ]
+
+    base_anchors = np.stack(base_anchors, axis=-1)
+    
+    return base_anchors
+    # -------------------------------------------
 
 def _whctrs(anchor):
     """

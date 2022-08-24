@@ -201,6 +201,7 @@ REGISTER_LAYER_CREATOR(Sigmoid, GetSigmoidLayer);
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetSoftmaxLayer(const LayerParameter& param) {
   SoftmaxParameter_Engine engine = param.softmax_param().engine();
+  engine = SoftmaxParameter_Engine_DEFAULT;
   if (engine == SoftmaxParameter_Engine_DEFAULT) {
     engine = SoftmaxParameter_Engine_CAFFE;
 #ifdef USE_CUDNN

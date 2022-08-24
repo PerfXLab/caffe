@@ -132,10 +132,10 @@ __C.TEST = edict()
 
 # Scales to use during testing (can list multiple scales)
 # Each scale is the pixel size of an image's shortest side
-__C.TEST.SCALES = (600,)
+__C.TEST.SCALES = (1024,) # (600,) modify for mmdetection faster rcnn by houxin 20220824
 
 # Max pixel size of the longest side of a scaled input image
-__C.TEST.MAX_SIZE = 1000
+__C.TEST.MAX_SIZE = 1024 # 1000 modify for mmdetection faster rcnn by houxin 20220824
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
