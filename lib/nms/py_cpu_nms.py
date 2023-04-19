@@ -27,8 +27,8 @@ def py_cpu_nms(dets, thresh):
         xx2 = np.minimum(x2[i], x2[order[1:]])
         yy2 = np.minimum(y2[i], y2[order[1:]])
 
-        w = np.maximum(0.0, xx2 - xx1 + 1)
-        h = np.maximum(0.0, yy2 - yy1 + 1)
+        w = np.maximum(0.0, xx2 - xx1 )
+        h = np.maximum(0.0, yy2 - yy1 )
         inter = w * h
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
 

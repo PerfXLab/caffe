@@ -547,6 +547,76 @@ message LayerParameter {
   optional VideoDataParameter video_data_param = 207;
   optional WindowDataParameter window_data_param = 129;
   optional UpsampleParameter upsample_param = 149;
+
+  optional RegionLossParameter region_loss_param = 600;
+  optional Yolov3Parameter yolov3_param = 603;
+  optional Yolov3DetectionOutputParameter yolov3_detection_output_param = 602;
+}
+
+message RegionLossParameter{
+  //Yolo 9000
+  optional uint32 side = 1 [default = 13];
+  optional uint32 num_class = 2 [default = 20];
+  optional uint32 bias_match = 3 [default = 1];
+  optional uint32 coords = 4 [default = 4];
+  optional uint32 num = 5 [default = 5];
+  optional uint32 softmax = 6 [default = 1];
+  optional float jitter = 7 [default = 0.2];
+  optional uint32 rescore = 8 [default = 1];
+
+  optional float object_scale = 9 [default = 1.0];
+  optional float class_scale = 10 [default = 1.0];
+  optional float noobject_scale = 11 [default = 0.5];
+  optional float coord_scale = 12 [default = 5.0];
+  optional uint32 absolute = 13 [default = 1];
+  optional float thresh = 14 [default = 0.2];
+  optional uint32 random = 15 [default = 1];
+  repeated float biases = 16;
+  optional string softmax_tree = 17;
+  optional string class_map = 18;
+}
+
+message Yolov3DetectionOutputParameter {
+  // Yolo detection output layer
+  optional uint32 num_classes = 1 [default = 20];
+  optional uint32 num_box = 2 [default = 3];
+  optional float confidence_threshold = 3 [default = 0.01];
+  optional float nms_threshold = 4 [default = 0.45];
+  repeated float biases = 5;
+  repeated uint32 anchors_scale = 6 ;
+  optional uint32 mask_group_num = 7 [default = 2];
+  repeated uint32 mask = 8;
+  optional bool gaussian_box = 9 [default = false];
+}
+
+message Yolov3Parameter{
+  //Yolov3
+  optional uint32 side = 1 [default = 13];
+  optional uint32 num_class = 2 [default = 20];
+  optional uint32 num = 3 [default = 5];
+  optional float object_scale = 4 [default = 1.0];
+  optional float class_scale = 5 [default = 1.0];
+  optional float noobject_scale = 6 [default = 0.5];
+  optional float coord_scale = 7 [default = 5.0];
+  optional float thresh = 8 [default = 0.2];
+  optional uint32 anchors_scale = 10 [default = 32];
+  repeated float biases = 11;
+  repeated uint32 mask = 12;
+  optional bool use_logic_gradient = 13 [default = false];
+  optional bool use_focal_loss = 14 [default = false];
+  enum IOU_LOSS {
+    IOU = 0;
+    GIOU = 1;
+    MSE = 2;
+    DIOU = 3;
+    CIOU = 4;
+  }
+  optional IOU_LOSS iou_loss = 15 [default = MSE];
+  optional float iou_normalizer = 16 [default = 0.25];
+  optional float iou_thresh = 17 [default = 0.5];
+  optional float max_delta = 18 [default = 10];
+  optional bool accumulate = 19 [default = true];
+  optional float label_smooth_eps = 20 [default = 0.1];
 }
 
 // Message that stores parameters used to apply transformation
