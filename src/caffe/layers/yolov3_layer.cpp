@@ -433,10 +433,10 @@ namespace caffe {
     }
     biases_size_ = param.biases_size()/2;
     int input_count = bottom[0]->count(1); //h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
-    int label_count = bottom[1]->count(1); //30*5-
+    //int label_count = bottom[1]->count(1); //30*5-
                          // outputs: classes, iou, coordinates
     int tmp_input_count = side_w_ * side_h_ * num_ * (4 + num_class_ + 1); //13*13*5*(20+4+1) label: isobj, class_label, coordinates
-    int tmp_label_count = 300 * num_;
+    //int tmp_label_count = 300 * num_;
     CHECK_EQ(input_count, tmp_input_count);
     //CHECK_EQ(label_count, tmp_label_count);
   }
@@ -640,7 +640,7 @@ namespace caffe {
         }
         int mask_n = int_index(mask_, best_n, num_);			
         if (mask_n >= 0) {
-          bool overlap = false;
+          //bool overlap = false;
           float iou;
           best_n = mask_n;
           //LOG(INFO) << best_n;
@@ -684,7 +684,7 @@ namespace caffe {
             float iou = box_iou(pred, truth_shift,iou_loss_); 
    
             if (iou > iou_thresh_) {
-              bool overlap = false;
+              //bool overlap = false;
               float iou;
               //LOG(INFO) << best_n;
               best_index = mask_n*len*stride + pos + b * bottom[0]->count(1);
@@ -800,8 +800,8 @@ namespace caffe {
               int index = n*len*stride + s + b*bottom[0]->count(1);
               //LOG(INFO)<<index;
               vector<Dtype> pred;
-              float best_iou = 0;
-              int best_class = -1;
+              //float best_iou = 0;
+              //int best_class = -1;
               vector<Dtype> best_truth;
               for (int c = 0; c < len; ++c) {
                 int index2 = c*stride + index;

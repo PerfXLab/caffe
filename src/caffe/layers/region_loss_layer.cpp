@@ -215,7 +215,7 @@ namespace caffe {
 
     Dtype avg_anyobj(0.0), avg_obj(0.0), avg_iou(0.0), avg_cat(0.0), recall(0.0), recall75(0.0), loss(0.0);
     int count = 0;
-    int class_count = 0;
+    //int class_count = 0;
     const Dtype* input_data = bottom[0]->cpu_data();
 
     //const Dtype* label_data = bottom[1]->cpu_data();
