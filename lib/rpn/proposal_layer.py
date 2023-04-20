@@ -25,7 +25,7 @@ class ProposalLayer(caffe.Layer):
         # parse the layer parameter string, which must be valid YAML
         # modify for mmdetection faster rcnn by houxin 20220824
         #layer_params = yaml.load(self.param_str_)
-        layer_params = yaml.load(self.param_str)
+        layer_params = yaml.load(self.param_str, Loader=yaml.SafeLoader)
         # ---------------------------------------------
 
         self._feat_stride = layer_params['feat_stride']
