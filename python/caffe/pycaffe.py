@@ -113,7 +113,10 @@ def _Net_forward(self, blobs=None, start=None, end=None, **kwargs):
 
     if end is not None:
         end_ind = list(self._layer_names).index(end)
-        outputs = set([end] + blobs)
+        if blobs is not None:
+            outputs = set(blobs)
+        else:
+            outputs = set([end] + blobs)
     else:
         end_ind = len(self.layers) - 1
         outputs = set(self.outputs + blobs)
@@ -131,6 +134,12 @@ def _Net_forward(self, blobs=None, start=None, end=None, **kwargs):
     self._forward(start_ind, end_ind)
 
     # Unpack blobs to extract
+    # print("forward.."+str(start_ind)+',,'+str(end_ind))
+    # print(list(self._layer_names))
+    # print([end])
+    # print(outputs)
+    # print(self.outputs)
+    # print(self.blobs.keys())
     return {out: self.blobs[out].data for out in outputs}
 
 
