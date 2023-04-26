@@ -113,7 +113,7 @@ def parse_args():
                         help='caffemodel path')
     parser.add_argument('--image_file', default='examples/yolov5/bus.jpg', type=str,
                         help='image path')
-    parser.add_argument('--isgray', default=False, type=bool,
+    parser.add_argument('--isgray', action='store_true',
                         help='whether to read single-channel images')
     parser.add_argument(
         '--norm_mean', default=[0, 0, 0], type=float, nargs=3, help='normalization mean')
@@ -151,9 +151,9 @@ def parse_args():
                         default=0.45, help='NMS IoU threshold')
     parser.add_argument('--max_det', default=1000, type=int,
                         help='maximum detections per image')
-    parser.add_argument('--agnostic_nms', default=False,
-                        type=bool, help='class-agnostic NMS')
-    parser.add_argument('--multi_label', default=False, type=bool,
+    parser.add_argument('--agnostic_nms', action='store_true',
+                        help='class-agnostic NMS')
+    parser.add_argument('--multi_label', action='store_true',
                         help='multiple labels per box (adds 0.5ms/img)')
     parser.add_argument('--names', default=['person', 'bicycle', 'car', 'motorcycle',
                                             'airplane', 'bus', 'train', 'truck', 'boat',

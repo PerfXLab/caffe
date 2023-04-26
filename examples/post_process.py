@@ -288,18 +288,9 @@ def visualization(detection, img, names):
             cv2.putText(img, text, (p1[0], p1[1] - 2 if outside else p1[1] + h + 2),
                         0, thickness / 3, txt_color, thickness=tf, lineType=cv2.LINE_AA)
 
-        # (text_width, text_height), baseline = cv2.getTextSize(
-        #     text, fontFace, fontScale, thickness)
-        # cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness)
-        # cv2.rectangle(img, (x1, y1-text_height-baseline),
-        #               (x1+text_width, y1+text_height+baseline), color, thickness)
-        # cv2.putText(img, text, (x1, y1), fontFace, fontScale,
-        #             color, thickness, lineType)
     cv2.imwrite("./result.jpg", img)
 
 # YOLO series
-
-
 def post_process(result, img, img0, conf_thres=0.25, iou_thres=0.45,
                  max_det=1000, na=3, no=85, agnostic_nms=False,
                  multi_label=False, strides=[8, 16, 32],

@@ -159,7 +159,7 @@ void class_index_and_score(Dtype* input, int classes, PredictionResult<Dtype>& p
 template <typename Dtype>
 void Yolov3DetectionOutputLayer<Dtype>::correct_yolo_boxes(PredictionResult<Dtype> &det, int w, int h, int netw, int neth, int relative)
 {
-  int i;
+  //int i;
   int new_w=0;
   int new_h=0;
   if (((float)netw/w) < ((float)neth/h)) {
@@ -238,7 +238,7 @@ void Yolov3DetectionOutputLayer<Dtype>::Forward_cpu(
   int len = 4 + num_class_ + 1;
   if(gaussian_box_) 
     len = 8 + num_class_ + 1;
-  int stride = side_w_*side_h_;
+  //int stride = side_w_*side_h_;
 
 
   if (Caffe::mode() == Caffe::CPU) {

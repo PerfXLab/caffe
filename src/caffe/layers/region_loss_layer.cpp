@@ -180,11 +180,11 @@ namespace caffe {
     }
 
 
-    int input_count = bottom[0]->count(1); //h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
-    int label_count = bottom[1]->count(1); //30*5-
+    //int input_count = bottom[0]->count(1); //h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
+    //int label_count = bottom[1]->count(1); //30*5-
                          // outputs: classes, iou, coordinates
-    int tmp_input_count = side_ * side_ * num_ * (coords_ + num_class_ + 1); //13*13*5*(20+4+1) label: isobj, class_label, coordinates
-    int tmp_label_count = 30 * num_;
+    //int tmp_input_count = side_ * side_ * num_ * (coords_ + num_class_ + 1); //13*13*5*(20+4+1) label: isobj, class_label, coordinates
+    //int tmp_label_count = 30 * num_;
     //CHECK_EQ(input_count, tmp_input_count);
     //CHECK_EQ(label_count, tmp_label_count);
   }
@@ -236,7 +236,7 @@ namespace caffe {
           //LOG(INFO)<<index;
           vector<Dtype> pred;
           float best_iou = 0;
-          int best_class = -1;
+          //int best_class = -1;
           vector<Dtype> best_truth;
           for (int c = 0; c < len; ++c) {
             int index2 = c*stride + index;
@@ -270,7 +270,7 @@ namespace caffe {
             truth.push_back(h);
             Dtype iou = box_iou(pred, truth);
             if (iou > best_iou) {
-              best_class = label_data[b * 300 * 5 + t * 5];
+              //best_class = label_data[b * 300 * 5 + t * 5];
               best_iou = iou;
               best_truth = truth;
             }
