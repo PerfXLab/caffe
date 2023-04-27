@@ -1261,7 +1261,7 @@ layer {
   bottom: "MaxPool_107"
   bottom: "MaxPool_108"
   bottom: "MaxPool_109"
-  top: "232"
+  top: "Concat_110"
   concat_param {
     axis: 1
   }
@@ -1269,7 +1269,7 @@ layer {
 layer {
   name: "Conv_111"
   type: "Convolution"
-  bottom: "232"
+  bottom: "Concat_110"
   top: "Conv_111"
   convolution_param {
     num_output: 512
