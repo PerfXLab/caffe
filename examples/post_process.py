@@ -294,9 +294,10 @@ def non_max_suppression_ssd(class_pred, box_pred, anchors,
     i = nms(box_thre, class_thre, iou_thres)  # NMS
     if i.shape[0] > max_det:  # limit detections
         i = i[:max_det]
-    output = np.concatenate((np.take(box_coord, i, axis=0),
+    output = [np.zeros((0, 6))]
+    output[0] = np.concatenate((np.take(box_coord, i, axis=0),
                              np.take(class_thre.reshape(-1,1),i,axis=0),
-                             np.expand_dims(np.take(cls,i,axis=0),axis=0)),axis=1)
+                             np.take(cls.reshape(class_thre.shape).reshape(-1,1),i,axis=0)),axis=1)
     return output
 
 
@@ -526,8 +527,6 @@ def post_process_ssd(result, img, img0, conf_thres=0.25, iou_thres=0.45, topk=20
                                    conf_thres, iou_thres, topk, max_det)
     # Process predictions
     for i, det in enumerate(pred):  # per image
-        if det.ndim == 1:
-            det = np.expand_dims(det,axis=0)
         if len(det):
             # Rescale boxes from img_size to im0 size
             det[:, [0, 2]] *= img_w
