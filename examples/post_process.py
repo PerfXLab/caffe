@@ -1,12 +1,28 @@
 import numpy as np
 import time
 import cv2
-from itertools import cycle
-from matplotlib import cm
-
+from itertools import product
+import math as m
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+
+def softmax(x, axis=1):
+    # Calculate the maximum value of each row
+    row_max = x.max(axis=axis)
+
+    # Each element in the row needs to be subtracted by the corresponding
+    # maximum value, otherwise calculating exp(x) will overflow, resulting
+    # in an inf situation
+    row_max = row_max.reshape(-1, 1)
+    x = x - row_max
+
+    # Calculate the exponential power of e
+    x_exp = np.exp(x)
+    x_sum = np.sum(x_exp, axis=axis, keepdims=True)
+    s = x_exp / x_sum
+    return s
 
 
 def make_grid(anchors, stride, nx=20, ny=20, na=3):
@@ -46,6 +62,8 @@ def nms(bounding_boxes, confidence_score, threshold):
 
     # Sort by confidence score of bounding boxes
     order = np.argsort(score)
+    if order.ndim == 2:
+        order = np.squeeze(order, axis=0)
 
     # Iterate bounding boxes
     while order.size > 0:
@@ -62,19 +80,18 @@ def nms(bounding_boxes, confidence_score, threshold):
         x2 = np.minimum(end_x[index], end_x[order[:-1]])
         y1 = np.maximum(start_y[index], start_y[order[:-1]])
         y2 = np.minimum(end_y[index], end_y[order[:-1]])
-
+        
         # Compute areas of intersection-over-union
         w = np.maximum(0.0, x2 - x1 + 1)
         h = np.maximum(0.0, y2 - y1 + 1)
         intersection = w * h
-
+        
         # Compute the ratio between intersection and union
         ratio = intersection / \
             (areas[index] + areas[order[:-1]] - intersection)
-
+        
         left = np.where(ratio < threshold)
         order = order[left]
-
     return np.array(picked_index)  # picked_index
 
 
@@ -99,8 +116,10 @@ def box_iou(box1, box2):
     area2 = box_area(box2.T)
 
     # inter(N,M) = (rb(N,M,2) - lt(N,M,2)).clamp(0).prod(2)
-    inter = (torch.min(box1[:, None, 2:], box2[:, 2:]) -
-             torch.max(box1[:, None, :2], box2[:, :2])).clamp(0).prod(2)
+    inter = np.minimum(box1[:, None, 2:], box2[:, 2:]) - \
+        np.maximum(box1[:, None, :2], box2[:, :2])
+    inter = np.clip(inter, 0, np.inf)
+    inter = np.prod(inter, axis=2)
     # iou = inter / (area1 + area2 - inter)
     return inter / (area1[:, None] + area2 - inter)
 
@@ -150,9 +169,11 @@ def clip_coords(boxes, shape):
     boxes[:, [1, 3]] = boxes[:, [1, 3]].clip(0, shape[0])  # y1, y2
 
 
-def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45,
-                        agnostic=False, multi_label=False, max_det=300):
+# yolo
+def non_max_suppression_yolo(prediction, conf_thres=0.25, iou_thres=0.45,
+                             agnostic=False, multi_label=False, max_det=300):
     """Runs Non-Maximum Suppression (NMS) on inference results
+       Implementation of output processing and NMS
 
     Returns:
          list of detections, on (n,6) tensor per image [xyxy, conf, cls]
@@ -240,6 +261,45 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45,
     return output
 
 
+# ssd
+def non_max_suppression_ssd(class_pred, box_pred, anchors,
+                            conf_thres=0.25, iou_thres=0.45, 
+                            topk=200, max_det=100):
+    class_p = class_pred.squeeze()  # [19248, 81]
+    box_p = box_pred.squeeze()  # [19248, 4]
+
+    class_p = np.transpose(class_p, (1, 0))  # [81, 19248]
+
+    # exclude the background class
+    class_p = class_p[1:, :]
+    # get the max score class of 19248 predicted boxes
+    class_p_max = class_p.max(axis=0)  # [19248]
+    class_p_max_index = np.argmax(class_p, axis=0)
+
+    # filter predicted boxes according the class score
+    keep = (class_p_max > conf_thres)
+    if len(np.where(keep)[0]) > topk:
+        class_p_max_thre = class_p_max[keep, :]
+        sorted_indices = np.argsort(-class_p_max_thre)
+        keep = sorted_indices[:200]
+    class_thre = class_p[:, keep]
+    box_thre, anchor_thre = box_p[keep, :], anchors[keep, :]
+    cls = class_p_max_index[keep]
+    
+    # decode boxes
+    box_thre = np.concatenate((anchor_thre[:, :2] + box_thre[:, :2] * 0.1 * anchor_thre[:, 2:],
+                               anchor_thre[:, 2:] * np.exp(box_thre[:, 2:] * 0.2)), axis=1)
+    box_coord = xywh2xyxy(box_thre[:, :4])
+
+    i = nms(box_thre, class_thre, iou_thres)  # NMS
+    if i.shape[0] > max_det:  # limit detections
+        i = i[:max_det]
+    output = np.concatenate((np.take(box_coord, i, axis=0),
+                             np.take(class_thre.reshape(-1,1),i,axis=0),
+                             np.expand_dims(np.take(cls,i,axis=0),axis=0)),axis=1)
+    return output
+
+
 class Colors:
     # Ultralytics color palette https://ultralytics.com/
     def __init__(self):
@@ -260,12 +320,34 @@ class Colors:
         return tuple(int(h[1 + i:1 + i + 2], 16) for i in (0, 2, 4))
 
 
+def make_anchors(img_h, img_w, conv_h, conv_w, scale, aspect_ratios=[1, 0.5, 2]):
+    """Generate anchors for the SSD series model based on the size of the output 
+    conv of each layer and the aspect ratio
+
+    """
+    prior_data = []
+    # Iteration order is important (it has to sync up with the convout)
+    for j, i in product(range(conv_h), range(conv_w)):
+        # + 0.5 because priors are in center
+        x = (i + 0.5) / conv_w
+        y = (j + 0.5) / conv_h
+
+        for ar in aspect_ratios:
+            ar = m.sqrt(ar)
+            w = scale * ar / img_w
+            h = scale / ar / img_w
+
+            prior_data += [x, y, w, h]
+
+    return prior_data
+
+
 def visualization(detection, img, names):
     # create a color cycle
     colors = Colors()  # create instance for 'from utils.plots import colors'
 
     for *xyxy, conf, cls in reversed(detection):
-        print('result = ', xyxy, conf, cls)
+        print('result is ',xyxy,conf,cls)
         x1, y1, x2, y2 = [round(x) for x in xyxy]
         class_name = f"{names[int(cls)]}"
         color = colors(int(cls), True)
@@ -290,62 +372,64 @@ def visualization(detection, img, names):
 
     cv2.imwrite("./result.jpg", img)
 
+
 # YOLO series
-def post_process(result, img, img0, conf_thres=0.25, iou_thres=0.45,
-                 max_det=1000, na=3, no=85, agnostic_nms=False,
-                 multi_label=False, strides=[8, 16, 32],
-                 anchors=[[[1.25000,  1.62500],
-                           [2.00000,  3.75000],
-                           [4.12500,  2.87500]],
-                          [[1.87500,  3.81250],
-                           [3.87500,  2.81250],
-                           [3.68750,  7.43750]],
-                          [[3.62500,  2.81250],
-                           [4.87500,  6.18750],
-                           [11.65625, 10.18750]]],
-                 names=['person', 'bicycle', 'car', 'motorcycle',
-                        'airplane', 'bus', 'train', 'truck', 'boat',
-                        'traffic light', 'fire hydrant', 'stop sign',
-                        'parking meter', 'bench', 'bird', 'cat', 'dog',
-                        'horse', 'sheep', 'cow', 'elephant', 'bear',
-                        'zebra', 'giraffe', 'backpack', 'umbrella',
-                        'handbag', 'tie', 'suitcase', 'frisbee', 'skis',
-                        'snowboard', 'sports ball', 'kite', 'baseball bat',
-                        'baseball glove', 'skateboard', 'surfboard',
-                        'tennis racket', 'bottle', 'wine glass', 'cup',
-                        'fork', 'knife', 'spoon', 'bowl', 'banana',
-                        'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-                        'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-                        'potted plant', 'bed', 'dining table', 'toilet', 'tv',
-                        'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-                        'microwave', 'oven', 'toaster', 'sink', 'refrigerator',
-                        'book', 'clock', 'vase', 'scissors', 'teddy bear',
-                        'hair drier', 'toothbrush']):
+def post_process_yolo(result, img, img0, conf_thres=0.25, iou_thres=0.45,
+                      max_det=1000, na=3, no=85, agnostic_nms=False,
+                      multi_label=False, strides=[8, 16, 32],
+                      anchors=[[[1.25000,  1.62500],
+                                [2.00000,  3.75000],
+                                [4.12500,  2.87500]],
+                               [[1.87500,  3.81250],
+                                [3.87500,  2.81250],
+                                [3.68750,  7.43750]],
+                               [[3.62500,  2.81250],
+                                [4.87500,  6.18750],
+                                [11.65625, 10.18750]]],
+                      names=['person', 'bicycle', 'car', 'motorcycle',
+                             'airplane', 'bus', 'train', 'truck', 'boat',
+                             'traffic light', 'fire hydrant', 'stop sign',
+                             'parking meter', 'bench', 'bird', 'cat', 'dog',
+                             'horse', 'sheep', 'cow', 'elephant', 'bear',
+                             'zebra', 'giraffe', 'backpack', 'umbrella',
+                             'handbag', 'tie', 'suitcase', 'frisbee', 'skis',
+                             'snowboard', 'sports ball', 'kite', 'baseball bat',
+                             'baseball glove', 'skateboard', 'surfboard',
+                             'tennis racket', 'bottle', 'wine glass', 'cup',
+                             'fork', 'knife', 'spoon', 'bowl', 'banana',
+                             'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
+                             'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+                             'potted plant', 'bed', 'dining table', 'toilet', 'tv',
+                             'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+                             'microwave', 'oven', 'toaster', 'sink', 'refrigerator',
+                             'book', 'clock', 'vase', 'scissors', 'teddy bear',
+                             'hair drier', 'toothbrush']):
     '''
     Runs post_process on inference results
 
     Inputs:
-        "result":   The output of net.forward(), if len(result) > 1, you need to organize 
+        "result":   The output of net.forward(), if len(result) > 1, you need to organize
         the result into a dictionary according to the output name of the layer.
         "img": Input original image.
         "img0": Input original image.
         "conf_thres": Confidence threshold, which is 0.25 by default.
         "iou_thres": NMS IoU threshold, which is 0.45 by default.
         "max_det": Maximum detections per image, which is 1000 by default.
-        "na":  This is a parameter of the object detection model that represents the number 
+        "na":  This is a parameter of the object detection model that represents the number
         of anchors corresponding to each pixel point, which is 3 by default.
-        "no":  The parameters of the object detection model represent the number of 
-        categories + 5 (positive sample probability and bounding box coordinates), which 
+        "no":  The parameters of the object detection model represent the number of
+        categories + 5 (positive sample probability and bounding box coordinates), which
         is 85 by default for the YOLO series.
-        "agnostic_nms": class-agnostic NMS. Class-agnostic NMS (Non-Maximum Suppression) 
-        is a technique used in object detection algorithms. Its purpose is to eliminate 
+        "agnostic_nms": class-agnostic NMS. Class-agnostic NMS (Non-Maximum Suppression)
+        is a technique used in object detection algorithms. Its purpose is to eliminate
         redundant detection results by only retaining the one with the highest confidence
         when multiple overlapping targets are detected.
-        Unlike class-specific NMS, class-agnostic NMS does not consider the category of 
+        Unlike class-specific NMS, class-agnostic NMS does not consider the category of
         the target, but instead processes all categories of detection results together.
-        This approach is simpler when dealing with multi-category object detection problems, 
+        This approach is simpler when dealing with multi-category object detection problems,
         but may result in conflicts between different categories.
-        "strides": It indicates how many times the output of the convolutional layer has been 
+        "multi_label": multiple labels per box (adds 0.5ms/img)
+        "strides": It indicates how many times the output of the convolutional layer has been
         resized relative to the input. It is generally a multiple of 2 and defaults to 8, 16, 32, etc.
         "anchors":  The configuration of anchors in the YOLO series. This value is related to the model.
         "names": The category names of the model, defaulting to the 80 category names of the COCO dataset.
@@ -363,19 +447,17 @@ def post_process(result, img, img0, conf_thres=0.25, iou_thres=0.45,
         out = sigmoid(out)
         out[..., 0:2] = (out[..., 0:2] * 2. - 0.5 + grid) * strides[key]  # xy
         out[..., 2:4] = (out[..., 2:4] * 2) ** 2 * anchor_grid
-
+        
         out = np.reshape(out, (1, -1, 85))
         output = np.concatenate(
             [output, out], axis=1) if len(output) > 0 else out
 
     # NMS
-    pred = non_max_suppression(
+    pred = non_max_suppression_yolo(
         output, conf_thres, iou_thres, agnostic_nms, multi_label, max_det)
 
     # Process predictions
     for i, det in enumerate(pred):  # per image
-        gn = np.array([img0.shape[1], img0.shape[0],
-                      img0.shape[1], img0.shape[0]])
         if len(det):
             # Rescale boxes from img_size to im0 size
             det[:, :4] = scale_coords(
@@ -383,3 +465,83 @@ def post_process(result, img, img0, conf_thres=0.25, iou_thres=0.45,
 
     visualization(det, img0, names)
     return det
+
+
+# SSD series
+def post_process_ssd(result, img, img0, conf_thres=0.25, iou_thres=0.45, topk=200,
+                     max_det=100, names=['ship'], scales=[27.0, 55.0, 111.0],
+                     aspect_ratios=[1, 0.5, 2], anchors_file='anchors.npy'
+                     ):
+    '''
+    Runs post_process on inference results
+
+    Inputs:
+        "result":   The output of net.forward(), if len(result) > 1, you need to organize
+        the result into a dictionary according to the output name of the layer.
+        "img": Input original image.
+        "img0": Input original image.
+        "conf_thres": Confidence threshold, which is 0.25 by default.
+        "iou_thres": NMS IoU threshold, which is 0.45 by default.
+        "topk": Only process the top-k results for each image 
+        "max_det": Maximum detections per image, which is 1000 by default.
+        "names": The category names of the model.
+        "scales": Generate scales corresponding to anchors.
+        "aspect_ratios":The aspect ratio of anchors generated by the SSD series model.
+        "anchors_file":  The configuration of anchors in the SSD series.
+
+    Returns:
+         list of detections, on (n,6) tensor per image [xyxy, conf, cls]
+    '''
+    output = []
+    batch, _, img_h, img_w = img.shape
+    index = 0
+    half = int(len(result)/2)
+    conf_list = []
+    loc_list = []
+    for key, value in result.items():
+        if index < half:
+            conf_list.append(np.transpose(
+                value, (0, 2, 3, 1)).reshape(batch, -1, 2))
+        else:
+            loc_list.append(np.transpose(
+                value, (0, 2, 3, 1)).reshape(batch, -1, 4))
+        index += 1
+
+    class_pred = np.hstack(conf_list)
+    box_pred = np.hstack(loc_list)
+    class_pred[0] = softmax(class_pred[0])
+
+    # anchors
+    anchors = []
+    shapes = [value.shape for key, value in result.items()][:half]
+    if isinstance(anchors, list):
+        for i, shape in enumerate(shapes):
+            anchors += make_anchors(img_h, img_w, shape[2],
+                                    shape[3], scales[i], aspect_ratios)
+    anchors = np.array(anchors).reshape(-1, 4)
+    np.save(anchors_file, anchors)
+
+    # NMS
+    pred = non_max_suppression_ssd(class_pred, box_pred, anchors,
+                                   conf_thres, iou_thres, topk, max_det)
+    # Process predictions
+    for i, det in enumerate(pred):  # per image
+        if det.ndim == 1:
+            det = np.expand_dims(det,axis=0)
+        if len(det):
+            # Rescale boxes from img_size to im0 size
+            det[:, [0, 2]] *= img_w
+            det[:, [1, 3]] *= img_h
+            det[:, :4] = scale_coords(
+                img.shape[2:], det[:, :4], img0.shape).round()
+
+    visualization(det, img0, names)
+
+    return det
+
+
+def post_process(*args, **kwargs):
+    if len(args) == 13 and isinstance(args[7], int):
+        post_process_yolo(*args, **kwargs)
+    elif len(args) == 11 and isinstance(args[7], list):
+        post_process_ssd(*args, **kwargs)

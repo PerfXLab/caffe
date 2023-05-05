@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+# Resize input image while keeping aspect ratio
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), 
               auto=True, scaleFill=False, scaleup=True, stride=32):
     # Resize and pad image while meeting stride-multiple constraints
@@ -39,13 +40,13 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114),
 
 
 def pre_process(img_file, img_shape=[640, 640],
-                norm_mean=[104, 117, 123],
+                norm_mean=[103.53, 116.28, 123.68],
                 norm_std=[57.1, 57.4, 58.4],
                 isgray=False, resize_mode='force'):
     '''
     img_file: img path
     img_shape:(width,height)
-    norm_mean: BGR mean,[104,117,123],ImageNet statistics value
+    norm_mean: BGR mean,[103.53, 116.28, 123.68],ImageNet statistics value
     norm_std: BGR std,[57.1, 57.4, 58.4],ImageNet statistics value
     isgray:
         True:Reading gray images
@@ -83,6 +84,8 @@ def pre_process(img_file, img_shape=[640, 640],
     img = (img - mean) / std
 
     # Convert
+    if isgray:
+        img = img[:, :, np.newaxis]
     img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
     img = np.ascontiguousarray(img)
     if len(img.shape) == 3:

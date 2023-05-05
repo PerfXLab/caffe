@@ -2,6 +2,10 @@
 '''
 Detection with YOLOv5s
 In this example, we will load a YOLOv5s model and use it to detect objects.
+
+usage example:
+  cd caffe
+  python examples/yolov5/detect.py
 '''
 import os
 import sys
