@@ -12,7 +12,6 @@ import sys
 import argparse
 import ast
 import tqdm
-import pdb
 
 # Make sure that caffe is on the python path:
 caffe_root = './'
@@ -156,7 +155,7 @@ class CaffeDetection:
     def __init__(self, model_def, model_weights, image_resize,
                  output_list, norm_mean, norm_std, isgray, resize_mode,
                  rect, scaleup, auto, conf_thres, iou_thres, max_det, na, no, 
-                 agnostic_nms, multi_label, strides, anchors, names):
+                 agnostic_nms, multi_label, visualization, strides, anchors, names):
         caffe.set_mode_cpu()
 
         self.image_resize = image_resize
@@ -175,6 +174,7 @@ class CaffeDetection:
         self.no = no
         self.agnostic_nms = agnostic_nms
         self.multi_label = multi_label
+        self.visualization = visualization
         self.strides = strides
         self.anchors = anchors
         self.names = names
@@ -192,7 +192,6 @@ class CaffeDetection:
                                 self.norm_mean, self.norm_std,self.isgray, 
                                 self.resize_mode, self.rect, self.scaleup, 
                                 self.auto)
-        print('img.shape = ',img.shape)
         ratio_pad = [ratio, pad]
         shape = img.shape
         self.net.blobs['data'].reshape(
@@ -220,7 +219,8 @@ class CaffeDetection:
 
         det = post_process(result, img, img0, self.conf_thres, self.iou_thres,
                            self.max_det, self.na, self.no, self.agnostic_nms,
-                           self.multi_label, strides, ratio_pad, anchors, self.names)
+                           self.multi_label, self.visualization, strides, 
+                           ratio_pad, anchors, self.names)
         return det, img, img0, ratio, pad
 
 
@@ -231,7 +231,8 @@ def main(args):
                                args.resize_mode, args.rect, args.scaleup,
                                args.auto, args.conf_thres, args.iou_thres,
                                args.max_det, args.na, args.no, args.agnostic_nms,
-                               args.multi_label, args.strides, args.anchors, args.names)
+                               args.multi_label, args.visualization, args.strides, 
+                               args.anchors, args.names)
     iouv = np.linspace(0.5, 0.95, 10)  # iou vector for mAP@0.5:0.95
     niou = np.size(iouv)
     img_size = 640
@@ -244,7 +245,6 @@ def main(args):
     label_folder_path = os.path.join(args.image_path, 'labels/train2017')
     for filename in tqdm.tqdm(os.listdir(image_folder_path)):
         if filename.endswith('.jpg') or filename.endswith('.png'):
-            print('image is = ',filename)
             img_file_path = os.path.join(image_folder_path, filename)
             label_file_path = os.path.join(label_folder_path, os.path.splitext(filename)[0]+'.txt')
             det, img, img0, ratio, pads = detection.detect(img_file_path)
@@ -308,7 +308,6 @@ def main(args):
     # Print results
     s = ('%20s' + '%11s' * 6) % ('Class', 'Images',
                                  'Labels', 'P', 'R', 'mAP@.5', 'mAP@.5:.95')
-
     print(s)
     pf = '%20s' + '%11i' * 2 + '%11.3g' * 4  # print format
     print(pf % ('all', seen, nt.sum(), mp, mr, map50, map))
@@ -378,6 +377,8 @@ def parse_args():
                         help='class-agnostic NMS')
     parser.add_argument('--multi_label', action='store_true',
                         help='multiple labels per box (adds 0.5ms/img)')
+    parser.add_argument('--visualization', action='store_true',
+                        help='whether visualization')
     parser.add_argument('--names', default=['person', 'bicycle', 'car', 'motorcycle',
                                             'airplane', 'bus', 'train', 'truck', 'boat',
                                             'traffic light', 'fire hydrant', 'stop sign',

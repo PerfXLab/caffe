@@ -5,7 +5,7 @@ In this example, we will load a redmodel and use it to detect objects.
 
 usage example:
   cd caffe
-  python examples/redmodel/detect.py --isgray --scaleup --auto
+  python examples/redmodel/detect.py --isgray --scaleup --auto --visualization
 '''
 
 import os
@@ -32,29 +32,11 @@ os.chdir(caffe_root)
 sys.path.insert(0, os.path.join(caffe_root, 'python'))
 
 
-sys.path.append('./examples')
-
-
-def print_log(data, file):
-    fp = open(file, 'w')
-    n, c, h, w = data.shape
-    fp.write('%d %d %d %d\n' % (n, c, h, w))
-    for i in range(n):
-        for j in range(c):
-            for k in range(h):
-                for t in range(w):
-                    fp.write("%.2f " % data[i][j][k][t])
-                fp.write('\n')
-            fp.write('\n')
-        fp.write('\n')
-    fp.close()
-
-
 class CaffeDetection:
     def __init__(self, model_def, model_weights, image_resize,
                  output_list, norm_mean, norm_std, isgray, resize_mode,
                  rect, scaleup, auto, conf_thres, iou_thres, topk, max_det, 
-                 names, scales, aspect_ratios, anchors_file):
+                 names, scales, aspect_ratios, visualization,  anchors_file):
         caffe.set_mode_cpu()
 
         self.image_resize = image_resize
@@ -73,6 +55,7 @@ class CaffeDetection:
         self.names = names
         self.scales = scales
         self.aspect_ratios = aspect_ratios
+        self.visualization = visualization
         self.anchors_file = anchors_file
 
         # Load the net in the test phase for inference, and configure input preprocessing.
@@ -111,7 +94,7 @@ class CaffeDetection:
         result[loc3] = self.net.blobs[loc3].data
         det = post_process(result, img, img0, self.conf_thres, self.iou_thres, self.topk,
                            self.max_det, self.names, self.scales, self.aspect_ratios,
-                           self.anchors_file)
+                           self.visualization, self.anchors_file)
         return det
 
 
@@ -123,7 +106,8 @@ def main(args):
                                args.resize_mode, args.rect, args.scaleup,
                                args.auto, args.conf_thres, args.iou_thres, 
                                args.topk, args.max_det, args.names, args.scales, 
-                               args.aspect_ratios, args.anchors_file)
+                               args.aspect_ratios, args.visualization, 
+                               args.anchors_file)
     det = detection.detect(args.image_file)
 
 
@@ -200,6 +184,8 @@ def parse_args():
                         help='class-agnostic NMS')
     parser.add_argument('--multi_label', action='store_true',
                         help='multiple labels per box (adds 0.5ms/img)')
+    parser.add_argument('--visualization', action='store_true',
+                        help='whether visualization')
     parser.add_argument('--names', default=['ship'], nargs='+', type=str,
                         help='category names')
     return parser.parse_args()

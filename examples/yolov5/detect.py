@@ -5,7 +5,7 @@ In this example, we will load a YOLOv5s model and use it to detect objects.
 
 usage example:
   cd caffe
-  python examples/yolov5/detect.py --scaleup --auto
+  python examples/yolov5/detect.py --scaleup --auto --visualization
 '''
 import os
 import sys
@@ -29,7 +29,8 @@ class CaffeDetection:
     def __init__(self, model_def, model_weights, image_resize,
                  output_list, norm_mean, norm_std, isgray, resize_mode,
                  rect, scaleup, auto, conf_thres, iou_thres, max_det, 
-                 na, no, agnostic_nms, multi_label, strides, anchors, names):
+                 na, no, agnostic_nms, multi_label, visualization, strides, 
+                 anchors, names):
         caffe.set_mode_cpu()
 
         self.image_resize = image_resize
@@ -48,6 +49,7 @@ class CaffeDetection:
         self.no = no
         self.agnostic_nms = agnostic_nms
         self.multi_label = multi_label
+        self.visualization = visualization
         self.strides = strides
         self.anchors = anchors
         self.names = names
@@ -65,8 +67,8 @@ class CaffeDetection:
                                 self.norm_mean, self.norm_std,
                                 self.isgray, self.resize_mode,
                                 self.rect, self.scaleup, self.auto)
+        ratio_pad=None
         shape = img.shape
-        print('img.shape = ',img.shape)
         self.net.blobs['data'].reshape(
             shape[0], shape[1], shape[2], shape[3])
         self.net.blobs['data'].data[...] = img
@@ -92,7 +94,8 @@ class CaffeDetection:
 
         det = post_process(result, img, img0, self.conf_thres, self.iou_thres,
                            self.max_det, self.na, self.no, self.agnostic_nms,
-                           self.multi_label, strides, anchors, self.names)             
+                           self.multi_label, self.visualization, strides, 
+                           ratio_pad, anchors, self.names)             
         return det
 
 
@@ -104,7 +107,7 @@ def main(args):
                                args.resize_mode, args.rect, args.scaleup, 
                                args.auto, args.conf_thres, args.iou_thres, 
                                args.max_det, args.na, args.no, args.agnostic_nms, 
-                               args.multi_label, args.strides, 
+                               args.multi_label, args.visualization, args.strides, 
                                args.anchors, args.names)
     det = detection.detect(args.image_file)
 
@@ -171,6 +174,8 @@ def parse_args():
                         help='class-agnostic NMS')
     parser.add_argument('--multi_label', action='store_true',
                         help='multiple labels per box (adds 0.5ms/img)')
+    parser.add_argument('--visualization', action='store_true',
+                        help='whether visualization')
     parser.add_argument('--names', default=['person', 'bicycle', 'car', 'motorcycle',
                                             'airplane', 'bus', 'train', 'truck', 'boat',
                                             'traffic light', 'fire hydrant', 'stop sign',
