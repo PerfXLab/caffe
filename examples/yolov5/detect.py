@@ -5,7 +5,7 @@ In this example, we will load a YOLOv5s model and use it to detect objects.
 
 usage example:
   cd caffe
-  python examples/yolov5/detect.py
+  python examples/yolov5/detect.py --scaleup --auto
 '''
 import os
 import sys
@@ -28,8 +28,8 @@ from post_process import post_process
 class CaffeDetection:
     def __init__(self, model_def, model_weights, image_resize,
                  output_list, norm_mean, norm_std, isgray, resize_mode,
-                 conf_thres, iou_thres, max_det, na, no, agnostic_nms,
-                 multi_label, strides, anchors, names):
+                 rect, scaleup, auto, conf_thres, iou_thres, max_det, 
+                 na, no, agnostic_nms, multi_label, strides, anchors, names):
         caffe.set_mode_cpu()
 
         self.image_resize = image_resize
@@ -38,6 +38,9 @@ class CaffeDetection:
         self.norm_std = norm_std
         self.isgray = isgray
         self.resize_mode = resize_mode
+        self.rect = rect
+        self.scaleup = scaleup
+        self.auto = auto
         self.conf_thres = conf_thres
         self.iou_thres = iou_thres
         self.max_det = max_det
@@ -58,11 +61,12 @@ class CaffeDetection:
         '''
         YOLOv5 detection
         '''
-        img, img0 = pre_process(image_file, self.image_resize,
-                                self.norm_mean,
-                                self.norm_std,
-                                self.isgray, self.resize_mode)
+        img, img0, _, _  = pre_process(image_file, self.image_resize,
+                                self.norm_mean, self.norm_std,
+                                self.isgray, self.resize_mode,
+                                self.rect, self.scaleup, self.auto)
         shape = img.shape
+        print('img.shape = ',img.shape)
         self.net.blobs['data'].reshape(
             shape[0], shape[1], shape[2], shape[3])
         self.net.blobs['data'].data[...] = img
@@ -97,9 +101,11 @@ def main(args):
     detection = CaffeDetection(args.model_def, args.model_weights,
                                args.image_resize, args.output_list,
                                args.norm_mean, args.norm_std, args.isgray,
-                               args.resize_mode, args.conf_thres, args.iou_thres,
-                               args.max_det, args.na, args.no, args.agnostic_nms,
-                               args.multi_label, args.strides, args.anchors, args.names)
+                               args.resize_mode, args.rect, args.scaleup, 
+                               args.auto, args.conf_thres, args.iou_thres, 
+                               args.max_det, args.na, args.no, args.agnostic_nms, 
+                               args.multi_label, args.strides, 
+                               args.anchors, args.names)
     det = detection.detect(args.image_file)
 
 
@@ -110,7 +116,7 @@ def parse_args():
                         default='examples/yolov5/yolov5s_v6.0.prototxt', type=str,
                         help='prototxt path')
     parser.add_argument(
-        '--image_resize', default=[640, 512], type=int, nargs=2,
+        '--image_resize', default=[640, 640], type=int, nargs=2,
         help='image input shape[width,height]')
     parser.add_argument('--model_weights',
                         default='examples/yolov5/yolov5s_v6.0.caffemodel', type=str,
@@ -128,6 +134,12 @@ def parse_args():
                         help='resize modes, including none (no resize), force (resize \
                             according to image_resize), smart (resize according to the \
                             longest side of image_resize while preserving the aspect ratio)')
+    parser.add_argument('--rect', action='store_true',
+                        help='Whether to keep the original aspect ratio of the image')
+    parser.add_argument('--scaleup', action='store_true',
+                        help='Whether to scaleup the image')
+    parser.add_argument('--auto', action='store_true', 
+                        help='The auto parameter determines the scaling method of the image')
     parser.add_argument(
         '--output_list', default=["Conv_196", "Conv_308", "Conv_420"], type=str, nargs=3,
         help='output layer name')

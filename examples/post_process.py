@@ -3,6 +3,7 @@ import time
 import cv2
 from itertools import product
 import math as m
+import pdb
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -145,6 +146,29 @@ def xyxy2xywh(x):
     return y
 
 
+def xywhn2xyxy(x, w=640, h=640, padw=0, padh=0):
+    # Convert nx4 boxes from [x, y, w, h] normalized to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
+    y = np.copy(x)
+    y[:, 0] = w * (x[:, 0] - x[:, 2] / 2) + padw  # top left x
+    y[:, 1] = h * (x[:, 1] - x[:, 3] / 2) + padh  # top left y
+    y[:, 2] = w * (x[:, 0] + x[:, 2] / 2) + padw  # bottom right x
+    y[:, 3] = h * (x[:, 1] + x[:, 3] / 2) + padh  # bottom right y
+    return y
+
+
+def xyxy2xywhn(x, w=640, h=640, clip=False, eps=0.0):
+    # Convert nx4 boxes from [x1, y1, x2, y2] to [x, y, w, h] normalized where xy1=top-left, xy2=bottom-right
+
+    if clip:
+        clip_coords(x, (h - eps, w - eps))  # warning: inplace clip
+    y = np.copy(x)
+    y[:, 0] = ((x[:, 0] + x[:, 2]) / 2) / w  # x center
+    y[:, 1] = ((x[:, 1] + x[:, 3]) / 2) / h  # y center
+    y[:, 2] = (x[:, 2] - x[:, 0]) / w  # width
+    y[:, 3] = (x[:, 3] - x[:, 1]) / h  # height
+    return y
+
+
 def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
     # Rescale coords (xyxy) from img1_shape to img0_shape
     if ratio_pad is None:  # calculate from img0_shape
@@ -223,11 +247,17 @@ def non_max_suppression_yolo(prediction, conf_thres=0.25, iou_thres=0.45,
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
         box = xywh2xyxy(x[:, :4])
 
-        # best class only
-        conf = np.max(x[:, 5:], axis=1, keepdims=True)
-        j = np.argmax(x[:, 5:], axis=1).reshape(-1, 1)
-        x = np.concatenate((box, conf, j.astype(np.float32)), axis=1)[
-            conf.reshape(-1) > conf_thres]
+        # Detections matrix nx6 (xyxy, conf, cls)
+        if multi_label:
+            print('x = ',x[:,5:])
+            #i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
+            i, j = np.nonzero(x[:, 5:] > conf_thres)
+            x = np.concatenate((box[i], x[i, j+5, None], j[:,None].astype(np.float32)), axis=1)
+        else: # best class only
+            conf = np.max(x[:, 5:], axis=1, keepdims=True)
+            j = np.argmax(x[:, 5:], axis=1).reshape(-1, 1)
+            x = np.concatenate((box, conf, j.astype(np.float32)), axis=1)[
+                conf.reshape(-1) > conf_thres]
 
         # Check shape
         n = x.shape[0]  # number of boxes
@@ -377,7 +407,7 @@ def visualization(detection, img, names):
 # YOLO series
 def post_process_yolo(result, img, img0, conf_thres=0.25, iou_thres=0.45,
                       max_det=1000, na=3, no=85, agnostic_nms=False,
-                      multi_label=False, strides=[8, 16, 32],
+                      multi_label=False, strides=[8, 16, 32], ratio_pad=None,
                       anchors=[[[1.25000,  1.62500],
                                 [2.00000,  3.75000],
                                 [4.12500,  2.87500]],
@@ -454,6 +484,7 @@ def post_process_yolo(result, img, img0, conf_thres=0.25, iou_thres=0.45,
             [output, out], axis=1) if len(output) > 0 else out
 
     # NMS
+    pdb.set_trace()
     pred = non_max_suppression_yolo(
         output, conf_thres, iou_thres, agnostic_nms, multi_label, max_det)
 
@@ -461,8 +492,7 @@ def post_process_yolo(result, img, img0, conf_thres=0.25, iou_thres=0.45,
     for i, det in enumerate(pred):  # per image
         if len(det):
             # Rescale boxes from img_size to im0 size
-            det[:, :4] = scale_coords(
-                img.shape[2:], det[:, :4], img0.shape).round()
+            scale_coords(img.shape[2:], det[:, :4], img0.shape[:2], ratio_pad).round()
 
     visualization(det, img0, names)
     return det
@@ -540,7 +570,9 @@ def post_process_ssd(result, img, img0, conf_thres=0.25, iou_thres=0.45, topk=20
 
 
 def post_process(*args, **kwargs):
-    if len(args) == 13 and isinstance(args[7], int):
-        post_process_yolo(*args, **kwargs)
+    det = []
+    if len(args) == 14 and isinstance(args[7], int):
+        det = post_process_yolo(*args, **kwargs)
     elif len(args) == 11 and isinstance(args[7], list):
-        post_process_ssd(*args, **kwargs)
+        det = post_process_ssd(*args, **kwargs)
+    return det

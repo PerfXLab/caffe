@@ -1,10 +1,47 @@
 import numpy as np
 import cv2
+import pdb
 
 # Resize input image while keeping aspect ratio
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), 
               auto=True, scaleFill=False, scaleup=True, stride=32):
-    # Resize and pad image while meeting stride-multiple constraints
+    """ Resize and pad image while meeting stride-multiple constraints
+
+    Args:
+        im (_type_): im is an image object that represents the image to be scaled.
+        It can be any image format that supports scaling operations, such as PIL.Image 
+        or numpy.ndarray.
+        new_shape (tuple, optional): The new_shape parameter is a tuple that 
+        determines the new shape of the image after scaling. For example, 
+        (640, 640) means that the image will be scaled to be 640 pixels wide 
+        and 640 pixels high. Defaults to (640, 640).
+        color (tuple, optional): The color parameter is a tuple that determines 
+        the color used to fill blank areas when scaling the image. It is usually 
+        an RGB value, such as (114, 114, 114) which represents gray. Defaults to 
+        (114, 114, 114).
+        auto (bool, optional): The auto parameter determines the scaling method 
+        of the image. If auto is True, the image will be automatically scaled 
+        according to its shape to fit the new shape. If auto is False, the image 
+        will retain its original size but may be cropped to fit the new shape. 
+        Defaults to True.
+        scaleFill (bool, optional): The scaleFill parameter determines the scaling 
+        method of the image. If scaleFill is True, the image will be scaled to fill 
+        the new shape without considering its aspect ratio. If scaleFill is False, 
+        the image will maintain its aspect ratio and scale to fit the new shape.
+        Defaults to False.
+        scaleup (bool, optional): The scaleup parameter determines whether the image 
+        can be enlarged. If scaleup is True, the image can be enlarged to fit the new 
+        shape. If scaleup is False, the image will not be enlarged and will instead
+        retain its original size. Defaults to True.
+        stride (int, optional): The stride parameter is an integer that determines
+        the step size when scaling the image. The larger the stride, the faster the 
+        image scales, but the accuracy may decrease. The smaller the stride, the slower 
+        the image scales, but the accuracy may increase. Defaults to 32.
+
+    Returns:
+        im, ratio, (dw, dh)
+    """
+
     shape = im.shape[:2]  # current shape [height, width]
     if isinstance(new_shape, int):
         new_shape = (new_shape, new_shape)
@@ -42,7 +79,8 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114),
 def pre_process(img_file, img_shape=[640, 640],
                 norm_mean=[103.53, 116.28, 123.68],
                 norm_std=[57.1, 57.4, 58.4],
-                isgray=False, resize_mode='force'):
+                isgray=False, resize_mode='force', 
+                rect=False, scaleup=True, auto=True):
     '''
     img_file: img path
     img_shape:(width,height)
@@ -55,8 +93,12 @@ def pre_process(img_file, img_shape=[640, 640],
         'none':Do not resize
         'force':Force resize input image according to img_shape
         'smart':Resize input image while keeping aspect ratio
+    rect: Whether to keep the original aspect ratio of the image
+    scaleup: Whether to scaleup the image
     '''
 
+    ratio = [0.0, 0.0]
+    pad = [0.0, 0.0]
     if isgray:
         img0 = cv2.imread(img_file, 0)
         mean = np.array(norm_mean[-1], dtype=np.float32)
@@ -77,7 +119,20 @@ def pre_process(img_file, img_shape=[640, 640],
         img = cv2.resize(img0, (width, height))
     elif resize_mode is 'smart':
         # Resize input image while keeping aspect ratio
-        img = letterbox(img0, new_shape=img_shape)[0]
+        if rect:
+            stride = 32
+            pad = 0.5
+            img_size = max(width, height)
+            s = img0.shape[:2]
+            ar = s[0] / s[1]
+            shapes = [ar,1] if ar < 1 else [1,1/ar]
+            shape = np.ceil(
+                np.array(shapes) * img_size / stride + pad).astype(int) * stride
+            h0,w0 = s[:2]
+            img, ratio, pad = letterbox(img0, new_shape=shape, auto=auto, scaleup=scaleup)
+
+        else:
+            img, ratio, pad = letterbox(img0, new_shape=img_shape, auto=auto, scaleup=scaleup)
 
     # normalization
     img = img.astype(np.float32)
@@ -90,4 +145,4 @@ def pre_process(img_file, img_shape=[640, 640],
     img = np.ascontiguousarray(img)
     if len(img.shape) == 3:
         img = img[None]  # expand for batch dim
-    return img, img0
+    return img, img0, ratio, pad
