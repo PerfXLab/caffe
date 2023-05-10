@@ -267,7 +267,7 @@ def non_max_suppression_yolo(prediction, conf_thres=0.25, iou_thres=0.45,
             continue
         elif n > max_nms:  # excess boxes
             # sort by confidence
-            x = x[x[:, 4].argsort(descending=True)[:max_nms]]
+            x = x[x[:, 4].argsort()[::-1][:max_nms]]
 
         # Batched NMS
         c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
@@ -483,7 +483,7 @@ def post_process_yolo(result, img, img0, conf_thres=0.25, iou_thres=0.45,
         out[..., 0:2] = (out[..., 0:2] * 2. - 0.5 + grid) * strides[key]  # xy
         out[..., 2:4] = (out[..., 2:4] * 2) ** 2 * anchor_grid
         
-        out = np.reshape(out, (1, -1, 85))
+        out = np.reshape(out, (1, -1, no))
         output = np.concatenate(
             [output, out], axis=1) if len(output) > 0 else out
 
