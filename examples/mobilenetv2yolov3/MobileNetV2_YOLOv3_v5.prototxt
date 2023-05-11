@@ -11,7 +11,7 @@ layer {
   top: "conv1"
   convolution_param {
     num_output: 16
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 1
@@ -20,25 +20,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm1"
-  type: "BatchNorm"
-  bottom: "conv1"
-  top: "conv1"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale1"
-  type: "Scale"
-  bottom: "conv1"
-  top: "conv1"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -54,7 +35,7 @@ layer {
   top: "conv2"
   convolution_param {
     num_output: 16
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 16
@@ -64,25 +45,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm2"
-  type: "BatchNorm"
-  bottom: "conv2"
-  top: "conv2"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale2"
-  type: "Scale"
-  bottom: "conv2"
-  top: "conv2"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -98,7 +60,7 @@ layer {
   top: "conv3"
   convolution_param {
     num_output: 8
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -107,25 +69,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm3"
-  type: "BatchNorm"
-  bottom: "conv3"
-  top: "conv3"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale3"
-  type: "Scale"
-  bottom: "conv3"
-  top: "conv3"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -135,7 +78,7 @@ layer {
   top: "conv4"
   convolution_param {
     num_output: 48
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -144,25 +87,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm4"
-  type: "BatchNorm"
-  bottom: "conv4"
-  top: "conv4"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale4"
-  type: "Scale"
-  bottom: "conv4"
-  top: "conv4"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -178,7 +102,7 @@ layer {
   top: "conv5"
   convolution_param {
     num_output: 48
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 48
@@ -188,25 +112,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm5"
-  type: "BatchNorm"
-  bottom: "conv5"
-  top: "conv5"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale5"
-  type: "Scale"
-  bottom: "conv5"
-  top: "conv5"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -222,7 +127,7 @@ layer {
   top: "conv6"
   convolution_param {
     num_output: 12
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -231,25 +136,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm6"
-  type: "BatchNorm"
-  bottom: "conv6"
-  top: "conv6"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale6"
-  type: "Scale"
-  bottom: "conv6"
-  top: "conv6"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -259,7 +145,7 @@ layer {
   top: "conv7"
   convolution_param {
     num_output: 72
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -268,25 +154,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm7"
-  type: "BatchNorm"
-  bottom: "conv7"
-  top: "conv7"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale7"
-  type: "Scale"
-  bottom: "conv7"
-  top: "conv7"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -302,7 +169,7 @@ layer {
   top: "conv8"
   convolution_param {
     num_output: 72
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 72
@@ -312,25 +179,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm8"
-  type: "BatchNorm"
-  bottom: "conv8"
-  top: "conv8"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale8"
-  type: "Scale"
-  bottom: "conv8"
-  top: "conv8"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -346,7 +194,7 @@ layer {
   top: "conv9"
   convolution_param {
     num_output: 12
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -355,25 +203,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm9"
-  type: "BatchNorm"
-  bottom: "conv9"
-  top: "conv9"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale9"
-  type: "Scale"
-  bottom: "conv9"
-  top: "conv9"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -393,7 +222,7 @@ layer {
   top: "conv10"
   convolution_param {
     num_output: 72
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -402,25 +231,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm10"
-  type: "BatchNorm"
-  bottom: "conv10"
-  top: "conv10"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale10"
-  type: "Scale"
-  bottom: "conv10"
-  top: "conv10"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -436,7 +246,7 @@ layer {
   top: "conv11"
   convolution_param {
     num_output: 72
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 72
@@ -446,25 +256,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm11"
-  type: "BatchNorm"
-  bottom: "conv11"
-  top: "conv11"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale11"
-  type: "Scale"
-  bottom: "conv11"
-  top: "conv11"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -480,7 +271,7 @@ layer {
   top: "conv12"
   convolution_param {
     num_output: 16
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -489,25 +280,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm12"
-  type: "BatchNorm"
-  bottom: "conv12"
-  top: "conv12"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale12"
-  type: "Scale"
-  bottom: "conv12"
-  top: "conv12"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -517,7 +289,7 @@ layer {
   top: "conv13"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -526,25 +298,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm13"
-  type: "BatchNorm"
-  bottom: "conv13"
-  top: "conv13"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale13"
-  type: "Scale"
-  bottom: "conv13"
-  top: "conv13"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -560,7 +313,7 @@ layer {
   top: "conv14"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 96
@@ -570,25 +323,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm14"
-  type: "BatchNorm"
-  bottom: "conv14"
-  top: "conv14"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale14"
-  type: "Scale"
-  bottom: "conv14"
-  top: "conv14"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -604,7 +338,7 @@ layer {
   top: "conv15"
   convolution_param {
     num_output: 16
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -613,25 +347,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm15"
-  type: "BatchNorm"
-  bottom: "conv15"
-  top: "conv15"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale15"
-  type: "Scale"
-  bottom: "conv15"
-  top: "conv15"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -651,7 +366,7 @@ layer {
   top: "conv16"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -660,25 +375,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm16"
-  type: "BatchNorm"
-  bottom: "conv16"
-  top: "conv16"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale16"
-  type: "Scale"
-  bottom: "conv16"
-  top: "conv16"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -694,7 +390,7 @@ layer {
   top: "conv17"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 96
@@ -704,25 +400,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm17"
-  type: "BatchNorm"
-  bottom: "conv17"
-  top: "conv17"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale17"
-  type: "Scale"
-  bottom: "conv17"
-  top: "conv17"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -738,7 +415,7 @@ layer {
   top: "conv18"
   convolution_param {
     num_output: 16
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -747,25 +424,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm18"
-  type: "BatchNorm"
-  bottom: "conv18"
-  top: "conv18"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale18"
-  type: "Scale"
-  bottom: "conv18"
-  top: "conv18"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -785,7 +443,7 @@ layer {
   top: "conv19"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -794,25 +452,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm19"
-  type: "BatchNorm"
-  bottom: "conv19"
-  top: "conv19"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale19"
-  type: "Scale"
-  bottom: "conv19"
-  top: "conv19"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -828,7 +467,7 @@ layer {
   top: "conv20"
   convolution_param {
     num_output: 96
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 96
@@ -838,25 +477,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm20"
-  type: "BatchNorm"
-  bottom: "conv20"
-  top: "conv20"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale20"
-  type: "Scale"
-  bottom: "conv20"
-  top: "conv20"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -872,7 +492,7 @@ layer {
   top: "conv21"
   convolution_param {
     num_output: 32
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -881,25 +501,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm21"
-  type: "BatchNorm"
-  bottom: "conv21"
-  top: "conv21"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale21"
-  type: "Scale"
-  bottom: "conv21"
-  top: "conv21"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -909,7 +510,7 @@ layer {
   top: "conv22"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -918,25 +519,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm22"
-  type: "BatchNorm"
-  bottom: "conv22"
-  top: "conv22"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale22"
-  type: "Scale"
-  bottom: "conv22"
-  top: "conv22"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -952,7 +534,7 @@ layer {
   top: "conv23"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 192
@@ -962,25 +544,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm23"
-  type: "BatchNorm"
-  bottom: "conv23"
-  top: "conv23"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale23"
-  type: "Scale"
-  bottom: "conv23"
-  top: "conv23"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -996,7 +559,7 @@ layer {
   top: "conv24"
   convolution_param {
     num_output: 32
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1005,25 +568,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm24"
-  type: "BatchNorm"
-  bottom: "conv24"
-  top: "conv24"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale24"
-  type: "Scale"
-  bottom: "conv24"
-  top: "conv24"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1043,7 +587,7 @@ layer {
   top: "conv25"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1052,25 +596,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm25"
-  type: "BatchNorm"
-  bottom: "conv25"
-  top: "conv25"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale25"
-  type: "Scale"
-  bottom: "conv25"
-  top: "conv25"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1086,7 +611,7 @@ layer {
   top: "conv26"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 192
@@ -1096,25 +621,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm26"
-  type: "BatchNorm"
-  bottom: "conv26"
-  top: "conv26"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale26"
-  type: "Scale"
-  bottom: "conv26"
-  top: "conv26"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1130,7 +636,7 @@ layer {
   top: "conv27"
   convolution_param {
     num_output: 32
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1139,25 +645,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm27"
-  type: "BatchNorm"
-  bottom: "conv27"
-  top: "conv27"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale27"
-  type: "Scale"
-  bottom: "conv27"
-  top: "conv27"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1177,7 +664,7 @@ layer {
   top: "conv28"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1186,25 +673,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm28"
-  type: "BatchNorm"
-  bottom: "conv28"
-  top: "conv28"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale28"
-  type: "Scale"
-  bottom: "conv28"
-  top: "conv28"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1220,7 +688,7 @@ layer {
   top: "conv29"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 192
@@ -1230,25 +698,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm29"
-  type: "BatchNorm"
-  bottom: "conv29"
-  top: "conv29"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale29"
-  type: "Scale"
-  bottom: "conv29"
-  top: "conv29"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1264,7 +713,7 @@ layer {
   top: "conv30"
   convolution_param {
     num_output: 32
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1273,25 +722,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm30"
-  type: "BatchNorm"
-  bottom: "conv30"
-  top: "conv30"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale30"
-  type: "Scale"
-  bottom: "conv30"
-  top: "conv30"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1311,7 +741,7 @@ layer {
   top: "conv31"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1320,25 +750,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm31"
-  type: "BatchNorm"
-  bottom: "conv31"
-  top: "conv31"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale31"
-  type: "Scale"
-  bottom: "conv31"
-  top: "conv31"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1354,7 +765,7 @@ layer {
   top: "conv32"
   convolution_param {
     num_output: 192
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 192
@@ -1364,25 +775,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm32"
-  type: "BatchNorm"
-  bottom: "conv32"
-  top: "conv32"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale32"
-  type: "Scale"
-  bottom: "conv32"
-  top: "conv32"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1398,7 +790,7 @@ layer {
   top: "conv33"
   convolution_param {
     num_output: 48
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1407,25 +799,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm33"
-  type: "BatchNorm"
-  bottom: "conv33"
-  top: "conv33"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale33"
-  type: "Scale"
-  bottom: "conv33"
-  top: "conv33"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1435,7 +808,7 @@ layer {
   top: "conv34"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1444,25 +817,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm34"
-  type: "BatchNorm"
-  bottom: "conv34"
-  top: "conv34"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale34"
-  type: "Scale"
-  bottom: "conv34"
-  top: "conv34"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1478,7 +832,7 @@ layer {
   top: "conv35"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 288
@@ -1488,25 +842,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm35"
-  type: "BatchNorm"
-  bottom: "conv35"
-  top: "conv35"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale35"
-  type: "Scale"
-  bottom: "conv35"
-  top: "conv35"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1522,7 +857,7 @@ layer {
   top: "conv36"
   convolution_param {
     num_output: 48
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1531,25 +866,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm36"
-  type: "BatchNorm"
-  bottom: "conv36"
-  top: "conv36"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale36"
-  type: "Scale"
-  bottom: "conv36"
-  top: "conv36"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1569,7 +885,7 @@ layer {
   top: "conv37"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1578,25 +894,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm37"
-  type: "BatchNorm"
-  bottom: "conv37"
-  top: "conv37"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale37"
-  type: "Scale"
-  bottom: "conv37"
-  top: "conv37"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1612,7 +909,7 @@ layer {
   top: "conv38"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 288
@@ -1622,25 +919,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm38"
-  type: "BatchNorm"
-  bottom: "conv38"
-  top: "conv38"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale38"
-  type: "Scale"
-  bottom: "conv38"
-  top: "conv38"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1656,7 +934,7 @@ layer {
   top: "conv39"
   convolution_param {
     num_output: 48
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1665,25 +943,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm39"
-  type: "BatchNorm"
-  bottom: "conv39"
-  top: "conv39"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale39"
-  type: "Scale"
-  bottom: "conv39"
-  top: "conv39"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1703,7 +962,7 @@ layer {
   top: "conv40"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1712,25 +971,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm40"
-  type: "BatchNorm"
-  bottom: "conv40"
-  top: "conv40"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale40"
-  type: "Scale"
-  bottom: "conv40"
-  top: "conv40"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1746,7 +986,7 @@ layer {
   top: "conv41"
   convolution_param {
     num_output: 288
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 288
@@ -1756,25 +996,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm41"
-  type: "BatchNorm"
-  bottom: "conv41"
-  top: "conv41"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale41"
-  type: "Scale"
-  bottom: "conv41"
-  top: "conv41"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1790,7 +1011,7 @@ layer {
   top: "conv42"
   convolution_param {
     num_output: 80
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1799,25 +1020,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm42"
-  type: "BatchNorm"
-  bottom: "conv42"
-  top: "conv42"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale42"
-  type: "Scale"
-  bottom: "conv42"
-  top: "conv42"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1827,7 +1029,7 @@ layer {
   top: "conv43"
   convolution_param {
     num_output: 480
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1836,25 +1038,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm43"
-  type: "BatchNorm"
-  bottom: "conv43"
-  top: "conv43"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale43"
-  type: "Scale"
-  bottom: "conv43"
-  top: "conv43"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1870,7 +1053,7 @@ layer {
   top: "conv44"
   convolution_param {
     num_output: 480
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 480
@@ -1880,25 +1063,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm44"
-  type: "BatchNorm"
-  bottom: "conv44"
-  top: "conv44"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale44"
-  type: "Scale"
-  bottom: "conv44"
-  top: "conv44"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1914,7 +1078,7 @@ layer {
   top: "conv45"
   convolution_param {
     num_output: 80
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1923,25 +1087,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm45"
-  type: "BatchNorm"
-  bottom: "conv45"
-  top: "conv45"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale45"
-  type: "Scale"
-  bottom: "conv45"
-  top: "conv45"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -1961,7 +1106,7 @@ layer {
   top: "conv46"
   convolution_param {
     num_output: 480
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -1970,25 +1115,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm46"
-  type: "BatchNorm"
-  bottom: "conv46"
-  top: "conv46"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale46"
-  type: "Scale"
-  bottom: "conv46"
-  top: "conv46"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2004,7 +1130,7 @@ layer {
   top: "conv47"
   convolution_param {
     num_output: 480
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 480
@@ -2014,25 +1140,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm47"
-  type: "BatchNorm"
-  bottom: "conv47"
-  top: "conv47"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale47"
-  type: "Scale"
-  bottom: "conv47"
-  top: "conv47"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2048,7 +1155,7 @@ layer {
   top: "conv48"
   convolution_param {
     num_output: 80
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2057,25 +1164,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm48"
-  type: "BatchNorm"
-  bottom: "conv48"
-  top: "conv48"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale48"
-  type: "Scale"
-  bottom: "conv48"
-  top: "conv48"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2095,7 +1183,7 @@ layer {
   top: "conv49"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2104,25 +1192,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm49"
-  type: "BatchNorm"
-  bottom: "conv49"
-  top: "conv49"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale49"
-  type: "Scale"
-  bottom: "conv49"
-  top: "conv49"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2138,7 +1207,7 @@ layer {
   top: "conv50"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 256
@@ -2148,25 +1217,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm50"
-  type: "BatchNorm"
-  bottom: "conv50"
-  top: "conv50"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale50"
-  type: "Scale"
-  bottom: "conv50"
-  top: "conv50"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2182,7 +1232,7 @@ layer {
   top: "conv51"
   convolution_param {
     num_output: 512
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2191,25 +1241,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm51"
-  type: "BatchNorm"
-  bottom: "conv51"
-  top: "conv51"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale51"
-  type: "Scale"
-  bottom: "conv51"
-  top: "conv51"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2225,7 +1256,7 @@ layer {
   top: "conv52"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2234,25 +1265,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm52"
-  type: "BatchNorm"
-  bottom: "conv52"
-  top: "conv52"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale52"
-  type: "Scale"
-  bottom: "conv52"
-  top: "conv52"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2268,7 +1280,7 @@ layer {
   top: "conv53"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 256
@@ -2278,25 +1290,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm53"
-  type: "BatchNorm"
-  bottom: "conv53"
-  top: "conv53"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale53"
-  type: "Scale"
-  bottom: "conv53"
-  top: "conv53"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2312,7 +1305,7 @@ layer {
   top: "conv54"
   convolution_param {
     num_output: 512
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2321,25 +1314,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm54"
-  type: "BatchNorm"
-  bottom: "conv54"
-  top: "conv54"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale54"
-  type: "Scale"
-  bottom: "conv54"
-  top: "conv54"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2355,7 +1329,7 @@ layer {
   top: "conv55"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2364,25 +1338,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm55"
-  type: "BatchNorm"
-  bottom: "conv55"
-  top: "conv55"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale55"
-  type: "Scale"
-  bottom: "conv55"
-  top: "conv55"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2398,7 +1353,7 @@ layer {
   top: "conv56"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 256
@@ -2408,25 +1363,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm56"
-  type: "BatchNorm"
-  bottom: "conv56"
-  top: "conv56"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale56"
-  type: "Scale"
-  bottom: "conv56"
-  top: "conv56"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2442,7 +1378,7 @@ layer {
   top: "conv57"
   convolution_param {
     num_output: 512
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2451,25 +1387,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm57"
-  type: "BatchNorm"
-  bottom: "conv57"
-  top: "conv57"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale57"
-  type: "Scale"
-  bottom: "conv57"
-  top: "conv57"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2506,7 +1423,7 @@ layer {
   top: "conv59"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2515,25 +1432,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm58"
-  type: "BatchNorm"
-  bottom: "conv59"
-  top: "conv59"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale58"
-  type: "Scale"
-  bottom: "conv59"
-  top: "conv59"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2562,7 +1460,7 @@ layer {
   top: "conv60"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2571,25 +1469,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm59"
-  type: "BatchNorm"
-  bottom: "conv60"
-  top: "conv60"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale59"
-  type: "Scale"
-  bottom: "conv60"
-  top: "conv60"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2605,7 +1484,7 @@ layer {
   top: "conv61"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -2615,25 +1494,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm60"
-  type: "BatchNorm"
-  bottom: "conv61"
-  top: "conv61"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale60"
-  type: "Scale"
-  bottom: "conv61"
-  top: "conv61"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2649,7 +1509,7 @@ layer {
   top: "conv62"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2658,25 +1518,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm61"
-  type: "BatchNorm"
-  bottom: "conv62"
-  top: "conv62"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale61"
-  type: "Scale"
-  bottom: "conv62"
-  top: "conv62"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2692,7 +1533,7 @@ layer {
   top: "conv63"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2701,25 +1542,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm62"
-  type: "BatchNorm"
-  bottom: "conv63"
-  top: "conv63"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale62"
-  type: "Scale"
-  bottom: "conv63"
-  top: "conv63"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2735,7 +1557,7 @@ layer {
   top: "conv64"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -2745,25 +1567,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm63"
-  type: "BatchNorm"
-  bottom: "conv64"
-  top: "conv64"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale63"
-  type: "Scale"
-  bottom: "conv64"
-  top: "conv64"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2779,7 +1582,7 @@ layer {
   top: "conv65"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2788,25 +1591,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm64"
-  type: "BatchNorm"
-  bottom: "conv65"
-  top: "conv65"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale64"
-  type: "Scale"
-  bottom: "conv65"
-  top: "conv65"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2822,7 +1606,7 @@ layer {
   top: "conv66"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2831,25 +1615,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm65"
-  type: "BatchNorm"
-  bottom: "conv66"
-  top: "conv66"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale65"
-  type: "Scale"
-  bottom: "conv66"
-  top: "conv66"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2865,7 +1630,7 @@ layer {
   top: "conv67"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -2875,25 +1640,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm66"
-  type: "BatchNorm"
-  bottom: "conv67"
-  top: "conv67"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale66"
-  type: "Scale"
-  bottom: "conv67"
-  top: "conv67"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2909,7 +1655,7 @@ layer {
   top: "conv68"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2918,25 +1664,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm67"
-  type: "BatchNorm"
-  bottom: "conv68"
-  top: "conv68"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale67"
-  type: "Scale"
-  bottom: "conv68"
-  top: "conv68"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -2973,7 +1700,7 @@ layer {
   top: "conv70"
   convolution_param {
     num_output: 64
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -2982,25 +1709,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm68"
-  type: "BatchNorm"
-  bottom: "conv70"
-  top: "conv70"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale68"
-  type: "Scale"
-  bottom: "conv70"
-  top: "conv70"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3029,7 +1737,7 @@ layer {
   top: "conv71"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3038,25 +1746,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm69"
-  type: "BatchNorm"
-  bottom: "conv71"
-  top: "conv71"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale69"
-  type: "Scale"
-  bottom: "conv71"
-  top: "conv71"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3072,7 +1761,7 @@ layer {
   top: "conv72"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -3082,25 +1771,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm70"
-  type: "BatchNorm"
-  bottom: "conv72"
-  top: "conv72"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale70"
-  type: "Scale"
-  bottom: "conv72"
-  top: "conv72"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3116,7 +1786,7 @@ layer {
   top: "conv73"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3125,25 +1795,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm71"
-  type: "BatchNorm"
-  bottom: "conv73"
-  top: "conv73"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale71"
-  type: "Scale"
-  bottom: "conv73"
-  top: "conv73"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3159,7 +1810,7 @@ layer {
   top: "conv74"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3168,25 +1819,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm72"
-  type: "BatchNorm"
-  bottom: "conv74"
-  top: "conv74"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale72"
-  type: "Scale"
-  bottom: "conv74"
-  top: "conv74"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3202,7 +1834,7 @@ layer {
   top: "conv75"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -3212,25 +1844,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm73"
-  type: "BatchNorm"
-  bottom: "conv75"
-  top: "conv75"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale73"
-  type: "Scale"
-  bottom: "conv75"
-  top: "conv75"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3246,7 +1859,7 @@ layer {
   top: "conv76"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3255,25 +1868,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm74"
-  type: "BatchNorm"
-  bottom: "conv76"
-  top: "conv76"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale74"
-  type: "Scale"
-  bottom: "conv76"
-  top: "conv76"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3289,7 +1883,7 @@ layer {
   top: "conv77"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3298,25 +1892,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm75"
-  type: "BatchNorm"
-  bottom: "conv77"
-  top: "conv77"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale75"
-  type: "Scale"
-  bottom: "conv77"
-  top: "conv77"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3332,7 +1907,7 @@ layer {
   top: "conv78"
   convolution_param {
     num_output: 128
-    bias_term: false
+    bias_term: true
     pad: 1
     kernel_size: 3
     group: 128
@@ -3342,25 +1917,6 @@ layer {
     }
     engine: CAFFE
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm76"
-  type: "BatchNorm"
-  bottom: "conv78"
-  top: "conv78"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale76"
-  type: "Scale"
-  bottom: "conv78"
-  top: "conv78"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3376,7 +1932,7 @@ layer {
   top: "conv79"
   convolution_param {
     num_output: 256
-    bias_term: false
+    bias_term: true
     pad: 0
     kernel_size: 1
     group: 1
@@ -3385,25 +1941,6 @@ layer {
       type: "xavier"
     }
     dilation: 1
-  }
-}
-layer {
-  name: "batch_norm77"
-  type: "BatchNorm"
-  bottom: "conv79"
-  top: "conv79"
-  batch_norm_param {
-    use_global_stats: true
-    eps: 1e-05
-  }
-}
-layer {
-  name: "bn_scale77"
-  type: "Scale"
-  bottom: "conv79"
-  top: "conv79"
-  scale_param {
-    bias_term: true
   }
 }
 layer {
@@ -3434,46 +1971,46 @@ layer {
   }
 }
 layer {
-    bottom: "conv58"
-    bottom: "conv69"
-    bottom: "conv80"
-    type: "Yolov3DetectionOutput"
-    top: "layer81-yolo"
-    name: "layer81-yolo"
-    yolov3_detection_output_param {
-        nms_threshold: 0.2
-        confidence_threshold: 0.3
-        num_classes: 1
-        biases: 10
-        biases: 13
-        biases:  16
-        biases: 30
-        biases:  33
-        biases: 23
-        biases:  30
-        biases: 61
-        biases:  62
-        biases: 45
-        biases:  59
-        biases: 119
-        biases:  116
-        biases: 90
-        biases:  156
-        biases: 198
-        biases:  373
-        biases: 326
-        mask: 6
-        mask: 7
-        mask: 8
-        mask: 3
-        mask: 4
-        mask: 5
-        mask: 0
-        mask: 1
-        mask: 2
-        mask_group_num: 3
-        anchors_scale: 32
-        anchors_scale: 16
-        anchors_scale: 8
-    }
+  name: "layer81-yolo"
+  type: "Yolov3DetectionOutput"
+  bottom: "conv58"
+  bottom: "conv69"
+  bottom: "conv80"
+  top: "layer81-yolo"
+  yolov3_detection_output_param {
+    num_classes: 1
+    confidence_threshold: 0.30000001192092896
+    nms_threshold: 0.20000000298023224
+    biases: 10.0
+    biases: 13.0
+    biases: 16.0
+    biases: 30.0
+    biases: 33.0
+    biases: 23.0
+    biases: 30.0
+    biases: 61.0
+    biases: 62.0
+    biases: 45.0
+    biases: 59.0
+    biases: 119.0
+    biases: 116.0
+    biases: 90.0
+    biases: 156.0
+    biases: 198.0
+    biases: 373.0
+    biases: 326.0
+    anchors_scale: 32
+    anchors_scale: 16
+    anchors_scale: 8
+    mask_group_num: 3
+    mask: 6
+    mask: 7
+    mask: 8
+    mask: 3
+    mask: 4
+    mask: 5
+    mask: 0
+    mask: 1
+    mask: 2
+  }
 }
