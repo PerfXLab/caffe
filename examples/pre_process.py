@@ -80,7 +80,7 @@ def pre_process(img_file, img_shape=[640, 640],
                 norm_mean=[103.53, 116.28, 123.68],
                 norm_std=[57.1, 57.4, 58.4],
                 isgray=False, resize_mode='force', 
-                rect=False, scaleup=True, auto=True):
+                scaleup=True, auto=True):
     '''
     img_file: img path
     img_shape:(width,height)
@@ -93,7 +93,6 @@ def pre_process(img_file, img_shape=[640, 640],
         'none':Do not resize
         'force':Force resize input image according to img_shape
         'smart':Resize input image while keeping aspect ratio
-    rect: Whether to keep the original aspect ratio of the image
     scaleup: Whether to scaleup the image
     '''
 
@@ -111,28 +110,15 @@ def pre_process(img_file, img_shape=[640, 640],
     # image resize
     width = img_shape[0]
     height = img_shape[1]
-    if resize_mode is 'none':
+    if resize_mode == 'none':
         # don't resize
         img = img0
-    elif resize_mode is 'force':
+    elif resize_mode == 'force':
         # Force resize input image according to img_shape
         img = cv2.resize(img0, (width, height))
-    elif resize_mode is 'smart':
+    elif resize_mode == 'smart':
         # Resize input image while keeping aspect ratio
-        if rect:
-            stride = 32
-            pad = 0.5
-            img_size = max(width, height)
-            s = img0.shape[:2]
-            ar = s[0] / s[1]
-            shapes = [ar,1] if ar < 1 else [1,1/ar]
-            shape = np.ceil(
-                np.array(shapes) * img_size / stride + pad).astype(int) * stride
-            h0,w0 = s[:2]
-            img, ratio, pad = letterbox(img0, new_shape=shape, auto=auto, scaleup=scaleup)
-
-        else:
-            img, ratio, pad = letterbox(img0, new_shape=img_shape, auto=auto, scaleup=scaleup)
+        img, ratio, pad = letterbox(img0, new_shape=img_shape, auto=auto, scaleup=scaleup)
 
     # normalization
     img = img.astype(np.float32)
