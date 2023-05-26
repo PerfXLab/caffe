@@ -70,7 +70,7 @@ class CaffeDetection:
         img, img0, _, _ = pre_process(image_file, self.image_resize,
                                 self.norm_mean, self.norm_std,
                                 self.isgray, self.resize_mode,
-                                self.rect, self.scaleup, self.auto)
+                                self.scaleup, self.auto)
         shape = img.shape
         self.net.blobs['data'].reshape(
             shape[0], shape[1], shape[2], shape[3])
