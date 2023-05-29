@@ -4,7 +4,7 @@ Validate a trained YOLOv5 model accuracy on a custom dataset
 
 usage example:
   cd caffe
-  python examples/yolov5/val.py --rect --multi_label
+  python examples/yolov5/val.py --rect --multi_label --batch_size 32
 """
 
 import os
@@ -12,6 +12,7 @@ import sys
 import argparse
 import ast
 import tqdm
+import logging
 
 # Make sure that caffe is on the python path:
 caffe_root = './'
@@ -152,13 +153,14 @@ def process_batch(detections, labels, iouv):
 
 
 class CaffeDetection:
-    def __init__(self, model_def, model_weights, image_resize,
+    def __init__(self, model_def, model_weights, image_resize, batch_size,
                  output_list, norm_mean, norm_std, isgray, resize_mode,
                  rect, scaleup, auto, conf_thres, iou_thres, max_det, na, no, 
                  agnostic_nms, multi_label, visualization, strides, anchors, names):
         caffe.set_mode_cpu()
 
         self.image_resize = image_resize
+        self.batch_size = batch_size
         self.output_list = output_list
         self.norm_mean = norm_mean
         self.norm_std = norm_std
@@ -184,15 +186,108 @@ class CaffeDetection:
                              model_weights,  # contains the trained weights
                              caffe.TEST)     # use test mode (e.g., don't perform dropout)
 
-    def detect(self, image_file):
+    def cache_labels(self, image_files, label_files, path='./labels.cache', prefix=''):
+        # Cache dataset labels, check images and read shapes
+        x = {}  # dict
+     
+        files = zip(image_files, label_files)
+        for im_file, label_file in files:
+            labels = readlabels(label_file)
+            if im_file:
+                img = cv2.imread(im_file)
+                x[im_file] = [labels, img.shape[:2]]
+
+        try:
+            np.save(path, x)  # save cache for next time
+            logging.info(f'{prefix}New cache created: {path}')
+        except Exception as e:
+            # path not writeable
+            logging.info(
+                f'{prefix}WARNING: Cache directory {path} is not writeable: {e}')
+        return x
+
+    def dataloader(self, image_files, label_files, prefix='',
+                   cache_path='./labels.cache'):
+        assert len(image_files) == len(label_files)
+        img_size = 640
+        stride = 32
+        pad = 0.5
+
+        # Check cache
+        try:
+            cache = np.load(
+                cache_path, allow_pickle=True).item()  # load dict
+        except:
+            cache = self.cache_labels(image_files, label_files)  # cache
+
+        # Read cache
+        labels, shapes = zip(*cache.values())
+        labels = list(labels)
+        shapes = np.array(shapes, dtype=np.float64)
+        image_files = list(cache.keys())  # update
+        label_files = list(label_files)
+
+        n = len(shapes)  # number of images
+        # batch index
+        bi = np.floor(np.arange(n) / self.batch_size).astype(int)
+        nb = bi[-1] + 1  # number of batches
+        batch = bi  # batch index of image
+        indices = range(n)
+
+        # Rectangular Training
+        if self.rect:
+            # Sort by aspect ratio
+            s = shapes  # wh
+            ar = s[:, 0] / s[:, 1]  # aspect ratio
+            irect = ar.argsort()
+            image_files = [image_files[i] for i in irect]
+            label_files = [label_files[i] for i in irect]
+            labels = [labels[i] for i in irect]
+            shapes = s[irect]  # wh
+            ar = ar[irect]
+
+            # Set training image shapes
+            shapes = [[1, 1]] * nb
+            for i in range(nb):
+                ari = ar[bi == i]
+                mini, maxi = ari.min(), ari.max()
+                if maxi < 1:
+                    shapes[i] = [maxi, 1]
+                elif mini > 1:
+                    shapes[i] = [1, 1 / mini]
+
+            batch_shapes = np.ceil(
+                np.array(shapes) * img_size / stride + pad).astype(int) * stride
+
+        for start_idx in range(0, len(image_files), self.batch_size):
+            end_idx = min(start_idx + self.batch_size, len(image_files))
+            excerpt = indices[start_idx:end_idx]
+            img_list = []
+            img0_list = []
+            ratio_list = []
+            pad_list = []
+            batch_labels = []
+            for index in excerpt:
+                batch_index = int(start_idx/self.batch_size)
+                img, img0, ratio, pad = pre_process(image_files[index], batch_shapes[batch_index],
+                                                    self.norm_mean, self.norm_std,
+                                                    self.isgray, self.resize_mode,
+                                                    self.scaleup, self.auto)
+
+                img_list.append(img)
+                img0_list.append(img0)
+                ratio_list.append(ratio)
+                pad_list.append(pad)
+                batch_labels.append(labels[index])
+
+            img_list = np.concatenate(img_list, axis=0)
+            yield img_list, img0_list, ratio_list, pad_list, batch_labels
+    
+    def detect(self, img, img0, ratio, pads):
         '''
         YOLOv5 detection
         '''
-        img, img0, ratio, pad = pre_process(image_file, self.image_resize,
-                                self.norm_mean, self.norm_std,self.isgray, 
-                                self.resize_mode, self.rect, self.scaleup, 
-                                self.auto)
-        ratio_pad = [ratio, pad]
+
         shape = img.shape
         self.net.blobs['data'].reshape(
             shape[0], shape[1], shape[2], shape[3])
@@ -217,16 +312,24 @@ class CaffeDetection:
         anchors[out2] = self.anchors[1]
         anchors[out3] = self.anchors[2]
 
-        det = post_process(result, img, img0, self.conf_thres, self.iou_thres,
-                           self.max_det, self.na, self.no, self.agnostic_nms,
-                           self.multi_label, self.visualization, strides, 
-                           ratio_pad, anchors, self.names)
-        return det, img, img0, ratio, pad
+        dets = []
+        for i in range(result[out1].shape[0]):
+            ratio_pad = [ratio[i], pads[i]]
+            res = {}
+            res[out1] = result[out1][i][np.newaxis, ...]
+            res[out2] = result[out2][i][np.newaxis, ...]
+            res[out3] = result[out3][i][np.newaxis, ...]
+            det = post_process(res, img[i], img0[i], self.conf_thres, self.iou_thres,
+                               self.max_det, self.na, self.no, self.agnostic_nms,
+                               self.multi_label, self.visualization, strides, 
+                               ratio_pad, anchors, self.names)
+            dets.append(det)
+        return dets
 
 
 def main(args):
     detection = CaffeDetection(args.model_def, args.model_weights,
-                               args.image_resize, args.output_list,
+                               args.image_resize, args.batch_size, args.output_list,
                                args.norm_mean, args.norm_std, args.isgray,
                                args.resize_mode, args.rect, args.scaleup,
                                args.auto, args.conf_thres, args.iou_thres,
@@ -243,57 +346,57 @@ def main(args):
 
     image_folder_path = os.path.join(args.image_path, 'images/train2017')
     label_folder_path = os.path.join(args.image_path, 'labels/train2017')
-    for filename in tqdm.tqdm(os.listdir(image_folder_path)):
-        if filename.endswith('.jpg') or filename.endswith('.png'):
-            img_file_path = os.path.join(image_folder_path, filename)
-            label_file_path = os.path.join(label_folder_path, os.path.splitext(filename)[0]+'.txt')
-            det, img, img0, ratio, pads = detection.detect(img_file_path)
+    image_lists = []
+    labels_lists = []
+    for file_name in os.listdir(image_folder_path):
+        image_lists.append(os.path.join(image_folder_path, file_name))
+        labels_lists.append(os.path.join(label_folder_path, os.path.splitext(file_name)[0]+'.txt'))
      
-            _, _, height, width = img.shape 
-            h0, w0 = img0.shape[:2]  # orig hw
+    for (img, img0, ratio, pads, labels) in tqdm.tqdm(detection.dataloader(image_lists, labels_lists)):
+        det = detection.detect(img, img0, ratio, pads)
+        for i in range(len(img)):
+            _, height, width = img[i].shape
+            h0, w0 = img0[i].shape[:2]  # orig hw
             r = img_size / max(h0, w0)  # ratio
             if r != 1:  # if sizes are not equal
-                im = cv2.resize(img0, (int(w0 * r), int(h0 * r)),
+                im = cv2.resize(img0[i], (int(w0 * r), int(h0 * r)),
                                 interpolation=cv2.INTER_AREA if r < 1 and not self.augment else cv2.INTER_LINEAR)
                 h, w = im.shape[:2]
-                img0 = im
+                img0[i] = im
             h, w = h0, w0  # im, hw_original, hw_resized
-            shapes = (h0, w0), ((h / h0, w / w0), pads)            
-            
-            labels = readlabels(label_file_path)
-            if labels.size:  # normalized xywh to pixel xyxy format
-                labels[:, 1:] = xywhn2xyxy(
-                    labels[:, 1:], ratio[0] * w, ratio[1] * h, padw=pads[0], padh=pads[1])
-            nl = len(labels)
+            shapes = (h0, w0), ((h / h0, w / w0), pads[i])
+            if np.array(labels[i]).size:  # normalized xywh to pixel xyxy format
+                labels[i][:, 1:] = xywhn2xyxy(
+                    labels[i][:, 1:], ratio[i][0] * w, ratio[i][1] * h, padw=pads[i][0], padh=pads[i][1])
+            nl = len(labels[i])
             if nl:
-                labels[:, 1:5] = xyxy2xywhn(
-                    labels[:, 1:5], w=img.shape[-1], h=img.shape[-2], clip=True, eps=1E-3)
-                labels[:, 1:] *= [width, height, width, height]
-            tcls = labels[:, 0].tolist() if nl else []  # target class
+                labels[i][:, 1:5] = xyxy2xywhn(
+                    labels[i][:, 1:5], w=img[i].shape[-1], h=img[i].shape[-2], clip=True, eps=1E-3)
+                labels[i][:, 1:] *= [width, height, width, height]
+            tcls = labels[i][:, 0].tolist() if nl else []  # target class
             seen += 1
 
-            if len(det) == 0:
+            if len(det[i]) == 0:
                 if nl:
                     stats.append(
                         (np.zeros((0, niou), dtype=bool), [], [], tcls))
                 continue
 
             # Predictions
-            predn = np.copy(det)
-            
+            predn = np.copy(det[i])
+
             # Evaluate
             if nl:
-                tbox = xywh2xyxy(labels[:, 1:5])  # target boxes
-                scale_coords(img.shape[1:], tbox, shapes[0], shapes[1])  # native-space labels
+                tbox = xywh2xyxy(labels[i][:, 1:5])  # target boxes
                 # native-space labels
-                labelsn = np.concatenate((labels[:, 0:1], tbox), axis=1)
+                scale_coords(img[i].shape[1:], tbox, shapes[0], shapes[1])
+                # native-space labels
+                labelsn = np.concatenate((labels[i][:, 0:1], tbox), axis=1)
                 correct = process_batch(predn, labelsn, iouv)
-
             else:
-                correct = np.zeros((det.shape[0], niou), dtype=bool)
+                correct = np.zeros((det[i].shape[0], niou), dtype=bool)
             stats.append(
-                (correct, det[:, 4], det[:, 5], tcls))
-
+                (correct, det[i][:, 4], det[i][:, 5], tcls))
     # Compute statistics
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats) and stats[0].any():
@@ -327,6 +430,7 @@ def parse_args():
                         help='caffemodel path')
     parser.add_argument('--image_file', default='examples/yolov5/bus.jpg', type=str,
                         help='image path')
+    parser.add_argument('--batch_size', default=1, type=int, help='batchsize')
     parser.add_argument('--image_path', default='examples/yolov5/coco128', type=str,
                         help='image path')
     parser.add_argument('--isgray', action='store_true',
