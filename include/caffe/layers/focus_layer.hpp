@@ -90,19 +90,23 @@ namespace caffe {
 	int outHeight = height / focusStride;
 	int outWidth = width / focusStride;
 
-	for (int y = 0; y < outHeight; ++y) {
-		for (int x = 0; x < outWidth; ++x) {
-			for (int c = 0; c < outChannels; ++c) {
+    for (int c = 0; c < outChannels; ++c)
+	    for (int y = 0; y < outHeight; ++y) {
+		    for (int x = 0; x < outWidth; ++x) {
+			 {
 				int out_index = x + outWidth*(y + outHeight*c);
 
 				int step = c / channels;
-				int x_offset = step % focusStride;
-				int y_offset = focusStride * ((step / focusStride) % focusStride);
+				// int x_offset = step % focusStride;
+				// int y_offset = focusStride * ((step / focusStride) % focusStride);
+                int x_offset = step / focusStride;
+				int y_offset = step% focusStride;
 
 				int in_x = x * focusStride + x_offset;
 				
 				int out_seq_y = y + c*outHeight;
-				int in_intermediate_y = out_seq_y*2 - out_seq_y%2;
+				// int in_intermediate_y = out_seq_y*2 - out_seq_y%2;
+                int in_intermediate_y = out_seq_y*2;
 				in_intermediate_y = in_intermediate_y % (channels*height);
 				int in_c = in_intermediate_y / height;
 				int in_y = in_intermediate_y % height + y_offset;
